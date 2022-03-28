@@ -1,2 +1,2 @@
-# Single-cell data analysis template repository
-This contains the raw structure I usually use when doing single-cell data analysis. 
+# moscot-framework
+Analysis repo for the moscot-framework project. 
