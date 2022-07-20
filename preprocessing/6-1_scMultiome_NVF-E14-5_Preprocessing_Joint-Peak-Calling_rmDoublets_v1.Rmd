@@ -1,0 +1,182 @@
+---
+title: "scRNA/ATAC-seq of NVF E14.5/E15.5 Pancreas - Joint Peak Calling and Fragment Quantification"
+author: "Michael Sterr"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float: true 
+---
+
+# Setup
+
+```{r}
+# General
+library(tidyverse) # incl. ggplot2
+library(knitr)
+library(Cairo)
+# library(grid)
+# library(R.utils)
+# library(MASS)
+# library(reshape2)
+# library(lessR)
+# library(readxl)
+# library(MKmisc)
+# library(fastmatch)
+
+# Analysis
+library(Signac)
+library(Seurat)
+library(EnsDb.Mmusculus.v102)
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(pastecs)
+
+# Plotting
+library(cowplot)
+
+# # Color
+# library(RColorBrewer)
+# library(viridis)
+# library(circlize) # colorRamp2
+# library(scico)
+# library(oce) # nice color maps e.g. oceColorsOxygen(n) ,deep, dense, speed, tempo, balance, delt, curl, haline
+# oceColorsOxygen <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/oxy-rgb.txt", header=FALSE))
+# oceColorsHaline <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/haline-rgb.txt", header=FALSE))
+# oceColorsDense <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/dense-rgb.txt", header=FALSE))
+# oceColorsDeep <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/deep-rgb.txt", header=FALSE))
+# oceColorsSeed <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/speed-rgb.txt", header=FALSE))
+# oceColorsTempo <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/tempo-rgb.txt", header=FALSE))
+# oceColorsBalance <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/balance-rgb.txt", header=FALSE))
+# oceColorsDelta <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/delta-rgb.txt", header=FALSE))
+# oceColorsCurl <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/curl-rgb.txt", header=FALSE))
+# oceColorsDiff <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/diff-rgb.txt", header=FALSE))
+# oceColorsTarn <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/tarn-rgb.txt", header=FALSE))
+# oceColorsIce <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/ice-rgb.txt", header=FALSE))
+# oceColorsRain <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/rain-rgb.txt", header=FALSE))
+# oceColorsAmp <- oceColorsClosure(read.table("https://raw.githubusercontent.com/matplotlib/cmocean/master/cmocean/rgb/amp-rgb.txt", header=FALSE))
+# michi_bk_rd_yl_4 <- oceColorsClosure(read.table("/home/michi/Software/viscm/maps/michi_bk_rd_yl_4.rgb.txt", header=FALSE, sep = ","))
+# michi_bk_bl_gn_yl <- oceColorsClosure(read.table("/home/michi/Software/viscm/maps/michi_bk_rd_yl_4.rgb.txt", header=FALSE, sep = ","))
+# michi_wt_rd_2 <- oceColorsClosure(read.table("/home/michi/Software/viscm/maps/michi_wt_rd_2.rgb.txt", header=FALSE, sep = ","))
+# michi_wt_rd_3 <- oceColorsClosure(read.table("/home/michi/Software/viscm/maps/michi_wt_rd_3.rgb.txt", header=FALSE, sep = ","))
+
+#Set theme for plotting
+##########################################
+#theme_set(theme_bw())
+theme_set(theme_cowplot())
+
+# Borders around cowplots:
+currentTheme <- theme_get()
+currentTheme <- theme_replace(aspect.ratio = 1,
+                              panel.border = element_rect(colour = "black", size = 0.75, fill = NA),
+                              rect = element_rect(colour = "black", size = 0.5, linetype = 1, fill = "transparent"),
+                              panel.background = element_rect(colour = "black", size = 0.5))
+currentTheme <- theme_update(plot.title = element_text(hjust = 0.5))
+
+library(future)
+plan("multicore", workers=64)
+options(future.globals.maxSize = 100 * 1024 ^ 3) # for 50 Gb RAM
+
+source("~/Scripts/R-Functions.R")
+
+# Parallelization
+library(BiocParallel)
+register(MulticoreParam(64, progressbar = TRUE))
+
+set.seed(1234)
+```
+
+# Prepare Annotations & Genome
+
+```{r}
+# extract gene annotations from EnsDb
+annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Mmusculus.v102)
+
+# rename chromosome names to match cellranger output
+BSgenome.Mmusculus.UCSC.mm10.renamed <- renameSeqlevels(BSgenome.Mmusculus.UCSC.mm10, value = str_replace(str_replace(seqnames(BSgenome.Mmusculus.UCSC.mm10), pattern = "chr", replacement = ""), pattern = "M", replacement = "MT"))
+```
+
+
+
+# Load Data & Concatenate Samples
+
+```{r}
+# read preprocessed data
+samples <- c("E14-5","E15-5")
+seurat_list <- list()
+
+for (sample in samples){
+  seurat_list[[sample]] <- readRDS(paste0("/storage/scRNA-seq/scMultiome_Mouse-Islets_NVF-E14.5_210044/data/cr_arc/cr_count/", sample, "/outs/", sample, "_raw_feature_bc_matrix_filtered_seurat_markedDoublets.rds"))
+  print(seurat_list[[sample]])
+  seurat_list[[sample]] <- subset(seurat_list[[sample]], subset= final_doublets, invert=TRUE)
+  print(seurat_list[[sample]])
+}
+
+seurat <- merge(seurat_list[[1]], y=c(seurat_list[[2]]), add.cell.ids = c("E14-5", "E15-5"), project = "NVF")
+#seurat <- seurat_list[[1]]
+```
+
+```{r}
+saveRDS(seurat, "/home/michi/Projects/scMultiome_NVF_Mouse-Pancreas-Development_E14.5_Notebooks/Files/E14-E15_adata_filtered_rmDoublets_seurat.rds")
+saveRDS(seurat_list, "/home/michi/Projects/scMultiome_NVF_Mouse-Pancreas-Development_E14.5_Notebooks/Files/E14-E15_adata_filtered_rmDoublets_list_seurat.rds")
+```
+
+```{r}
+# bed$V1 <- substring(bed$V1, 4)
+
+# Read blacklist file
+blacklist.BED <- read.delim("/home/michi/Genomes/mm10/mm10-blacklist.v2.bed", header = FALSE, stringsAsFactors = FALSE)
+names(blacklist.BED) <- c("Chr", "Start", "End", "Type")
+blacklist.BED$Chr <- substring(blacklist.BED$Chr, 4)
+blacklist.BED$Strand <- "*"
+blacklist.ranges <- makeGRangesFromDataFrame(df = blacklist.BED, seqnames.field = "Chr", start.field = "Start", end.field = "End", keep.extra.columns = TRUE)
+
+```
+
+
+
+# Joint Peak Calling
+
+```{r}
+DefaultAssay(seurat) <- "ATAC"
+
+# call peaks using MACS2
+peaks <- CallPeaks(seurat, macs2.path = "/home/michi/Software/venvs/scAnalysis_sc1.8_mu0.1.3_R4.1/bin/macs2")
+
+# remove peaks on nonstandard chromosomes and in genomic blacklist regions
+peaks <- keepStandardChromosomes(peaks, pruning.mode = "coarse")
+peaks <- subsetByOverlaps(x = peaks, ranges = blacklist.ranges, invert = TRUE)
+
+# quantify counts in each peak
+macs2_counts <- FeatureMatrix(
+  fragments = Fragments(seurat),
+  features = peaks,
+  cells = colnames(seurat)
+)
+
+# create a new assay using the MACS2 peak set and add it to the Seurat object
+seurat[["peaks"]] <- CreateChromatinAssay(
+  counts = macs2_counts,
+  fragments = Fragments(seurat),
+  annotation = annotations
+)
+
+saveRDS(seurat, "/home/michi/Projects/scMultiome_NVF_Mouse-Pancreas-Development_E14.5_Notebooks/Files/E14-E15_adata_filtered_rmDoublets_seurat_jointPeaks.rds")
+```
+
+```{r}
+# export peak count matrix
+HDF5Array::writeTENxMatrix(x = macs2_counts, file="/home/michi/Projects/scMultiome_NVF_Mouse-Pancreas-Development_E14.5_Notebooks/Files/E14-E15_adata_filtered_rmDoublets_seurat_jointPeaks_peaks_count_matrix.h5")
+write.table(x = rownames(macs2_counts), file = "/home/michi/Projects/scMultiome_NVF_Mouse-Pancreas-Development_E14.5_Notebooks/Files/E14-E15_adata_filtered_rmDoublets_seurat_jointPeaks_peaks_count_matrix_features.txt", col.names = FALSE, row.names = FALSE)
+write.table(x = colnames(macs2_counts), file = "/home/michi/Projects/scMultiome_NVF_Mouse-Pancreas-Development_E14.5_Notebooks/Files/E14-E15_adata_filtered_rmDoublets_seurat_jointPeaks_peaks_count_matrix_barcodes.txt", col.names = FALSE, row.names = FALSE)
+```
+
+```{r}
+sessionInfo()
+```
+
+
+
+
+

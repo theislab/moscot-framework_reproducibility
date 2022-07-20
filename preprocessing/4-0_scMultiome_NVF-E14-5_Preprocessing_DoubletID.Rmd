@@ -1,0 +1,310 @@
+---
+title: "NVF E14.5/E15.5 Pancreas - Doublet Identification"
+author: "Michael Sterr"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+```{r, results='hold',warning=FALSE,error=FALSE,message=FALSE}
+# General
+library(tidyverse) # incl. ggplot2
+library(cowplot)
+library(reticulate)
+use_python("/home/michi/Software/venvs/scAnalysis_1.8_R4.1/bin/python3", required = TRUE)
+theme_set(theme_cowplot())
+
+# Analysis
+library(DoubletFinder)
+library(Seurat)
+library(sctransform)
+library(scDblFinder)
+library(SingleCellExperiment)
+library(scater)
+library(scds)
+library(pastecs)
+
+# Parallelization
+library(BiocParallel)
+register(MulticoreParam(64, progressbar = TRUE))
+
+set.seed(1234)
+```
+
+
+# Doublet Identification
+
+## Load Data
+
+```{r}
+sample_names <- c('E14-5','E15-5')
+base_path <- "/home/michi/Projects/scMultiome_NVF_Mouse-Pancreas-Development_E14.5_Notebooks/Files/DoubletFinder/"
+file_suffix <- "_raw_gex_bc_matrix_filtered"
+clusters = FALSE # scDblFinder has two main modes for generating artificial doublets: a random one (clusters=FALSE, now default) and a cluster-based one (clusters=TRUE or providing your own clusters - the approach from previous versions). In practice, we observed that both approaches perform well (and better than alternatives). We suggest using the cluster-based approach when the datasets are segregated into clear clusters, and the random one for the rest (e.g. developmental trajectories).
+```
+
+
+```{python}
+# General
+import scipy as sci
+import numpy as np
+import pandas as pd
+import logging
+import scipy.stats
+
+# Analysis
+import scanpy as sc
+sc.logging.print_versions()
+```
+
+```{python}
+sample_1_filtered = sc.read('/storage/scRNA-seq/scMultiome_Mouse-Islets_NVF-E14.5_210044/data/cr_arc/cr_count/E14-5/outs/E14-5_raw_gex_bc_matrix_filtered.h5ad')
+sample_2_filtered = sc.read('/storage/scRNA-seq/scMultiome_Mouse-Islets_NVF-E14.5_210044/data/cr_arc/cr_count/E15-5/outs/E15-5_raw_gex_bc_matrix_filtered.h5ad')
+# sample_3_filtered = sc.read('/storage/scRNA-seq/scMultiome_FVF_Crypts_P21021/data/rev0/cr_count/FVF-neg/outs/FVF-neg_raw_gex_bc_matrix_filtered.h5ad')
+```
+
+```{python}
+sample_1_filtered_x=sample_1_filtered.X.T
+sample_2_filtered_x=sample_2_filtered.X.T
+# sample_3_filtered_x=sample_3_filtered.X.T
+
+sample_1_filtered_var=list(sample_1_filtered.var_names)
+sample_2_filtered_var=list(sample_2_filtered.var_names)
+# sample_3_filtered_var=list(sample_3_filtered.var_names)
+
+sample_1_filtered_obs=list(sample_1_filtered.obs_names)
+sample_2_filtered_obs=list(sample_2_filtered.obs_names)
+# sample_3_filtered_obs=list(sample_3_filtered.obs_names)
+```
+
+
+```{r, results='hold',warning=FALSE,error=FALSE,message=FALSE}
+sample_1_filtered_x <- py$sample_1_filtered_x
+rownames(sample_1_filtered_x) <- py$sample_1_filtered_var
+colnames(sample_1_filtered_x) <- py$sample_1_filtered_obs
+
+sample_2_filtered_x <- py$sample_2_filtered_x
+rownames(sample_2_filtered_x) <- py$sample_2_filtered_var
+colnames(sample_2_filtered_x) <- py$sample_2_filtered_obs
+# 
+# sample_3_filtered_x <- py$sample_3_filtered_x
+# rownames(sample_3_filtered_x) <- py$sample_3_filtered_var
+# colnames(sample_3_filtered_x) <- py$sample_3_filtered_obs
+```
+
+## scDblFinder & scdc with Standard Preprocessing
+
+```{r, results='hold',warning=FALSE,error=FALSE,message=FALSE}
+# Initialize the Seurat object with the raw (non-normalized data).
+sample_1.seurat <- CreateSeuratObject(counts = sample_1_filtered_x, project = "0", min.cells = 1, min.features = 0)
+sample_2.seurat <- CreateSeuratObject(counts = sample_2_filtered_x, project = "0", min.cells = 1, min.features = 0)
+# sample_3.seurat <- CreateSeuratObject(counts = sample_3_filtered_x, project = "0", min.cells = 1, min.features = 0)
+
+seurat.list <- list(sample_1.seurat, sample_2.seurat)#, sample_3.seurat)
+names(seurat.list) <- sample_names
+
+sce.list <- list()
+
+# Basic Preprocessing
+for (i in 1:length(seurat.list)) {
+    seurat.list[[i]] <- NormalizeData(seurat.list[[i]], verbose = FALSE)
+    seurat.list[[i]] <- FindVariableFeatures(seurat.list[[i]], selection.method = "vst", nfeatures = 5000, verbose = FALSE)
+    seurat.list[[i]] <- ScaleData(seurat.list[[i]], verbose = FALSE)
+    seurat.list[[i]] <- RunPCA(seurat.list[[i]], npcs = 50, verbose = FALSE)
+    seurat.list[[i]] <- RunUMAP(seurat.list[[i]], reduction = "pca", dims = 1:50)
+    seurat.list[[i]] <- FindNeighbors(seurat.list[[i]], dims = 1:50, verbose = FALSE)
+    seurat.list[[i]] <- FindClusters(seurat.list[[i]], verbose = FALSE, resolution = 0.5)
+    print(DimPlot(seurat.list[[i]], label = TRUE))
+    
+    #Conversion to SingleCellExperiment
+    sce.list[[i]] <- as.SingleCellExperiment(seurat.list[[i]])
+    
+    #scDblFinder
+    colData(sce.list[[i]])$scoresDoubletDensity <- computeDoubletDensity(sce.list[[i]])
+    sce.list[[i]] <- scDblFinder(sce.list[[i]], clusters = clusters) #, dbr=0.1)
+    
+    # SCDS
+    sce.list[[i]] <- cxds(sce.list[[i]], retRes = TRUE)
+    sce.list[[i]] <- bcds(sce.list[[i]], retRes = TRUE, verb=TRUE)
+    sce.list[[i]] <- cxds_bcds_hybrid(sce.list[[i]])
+    
+    dens <- density(sce.list[[i]]$hybrid_score)
+    min_idx <- match(-1, extract(turnpoints(dens$y, calc.proba = TRUE)))
+    cut_off <- dens$x[min_idx[length(min_idx)]]
+    
+    print(ggplot(as.data.frame(colData(sce.list[[i]])), aes(x=hybrid_score)) + geom_density() + geom_vline(xintercept = cut_off, linetype=2))
+    
+    sce.list[[i]]$hybrid_class <- "doublet"
+    sce.list[[i]][,sce.list[[i]]$hybrid_score < cut_off]$hybrid_class <- "singlet"
+    
+    #Plots
+    print(plotUMAP(sce.list[[i]], colour_by="hybrid_score"))
+    print(plotUMAP(sce.list[[i]], colour_by="hybrid_class"))
+    print(plotUMAP(sce.list[[i]], colour_by="scDblFinder.score"))
+    print(plotUMAP(sce.list[[i]], colour_by="scDblFinder.class"))
+    #print(plotUMAP(sce.list[[i]], colour_by="scDblFinder.cluster"))
+    print(plotUMAP(sce.list[[i]], colour_by="Lgr5"))
+    print(plotUMAP(sce.list[[i]], colour_by="Neurog3"))
+    print(plotUMAP(sce.list[[i]], colour_by="Neurod1"))
+    print(plotUMAP(sce.list[[i]], colour_by="Top2a"))
+    print(plotUMAP(sce.list[[i]], colour_by="nCount_RNA"))
+    print(plotUMAP(sce.list[[i]], colour_by="nFeature_RNA"))
+    print(plotUMAP(sce.list[[i]], colour_by="seurat_clusters"))
+    
+    #Save doublets
+    doublets <- colData(sce.list[[i]])[,c("scDblFinder.class", "scDblFinder.score", "hybrid_class", "hybrid_score")]
+    write.table(doublets, file = paste0(base_path, names(seurat.list)[i], file_suffix,"_scDblFinder_scds.txt"), sep = "\t")
+}
+
+saveRDS(sce.list,paste0(base_path, "scDblFinder_sce_list.rds"))
+```
+
+
+## DoubletFinder with Standard Preprocessing
+
+
+```{r, results='hold',warning=FALSE,error=FALSE,message=FALSE}
+for (i in 1:length(seurat.list)) {
+    ## pK Identification (no ground-truth) ---------------------------------------------------------------------------------------
+    sweep.res.list <- paramSweep_v3(seurat.list[[i]], PCs = 1:50, sct = FALSE, num.cores = 64)
+    sweep.stats <- summarizeSweep(sweep.res.list, GT = FALSE)
+    bcmvn <- find.pK(sweep.stats)
+    
+    ## Homotypic Doublet Proportion Estimate -------------------------------------------------------------------------------------
+    homotypic.prop <- modelHomotypic(seurat.list[[i]]@meta.data$seurat_clusters)           ## ex: annotations <- seurat.list[[1]]@meta.data$ClusteringResults
+    nExp_poi <- round(0.1*length(seurat.list[[i]]@meta.data$seurat_clusters))  # I guess that doublet formation rate is higher than the ~7.5% estimated from 10x if doublets are present in input cell suspension -> set to 10%  ## Assuming 7.5% doublet formation rate - tailor for your dataset
+    nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
+    
+    ## Run DoubletFinder with varying classification stringencies ----------------------------------------------------------------
+    seurat.list[[i]] <- doubletFinder_v3(seurat.list[[i]], 
+                                              PCs = 1:50, 
+                                              pN = 0.25, 
+                                              pK = as.numeric(as.character(bcmvn$pK[which.max(bcmvn$BCmetric)])), 
+                                              nExp = nExp_poi, 
+                                              reuse.pANN = FALSE, 
+                                              sct = FALSE)
+    
+    seurat.list[[i]] <- doubletFinder_v3(seurat.list[[i]], 
+                                              PCs = 1:50, 
+                                              pN = 0.25, 
+                                              pK = as.numeric(as.character(bcmvn$pK[which.max(bcmvn$BCmetric)])), 
+                                              nExp = nExp_poi.adj, 
+                                              reuse.pANN = paste0("pANN_0.25_",as.character(bcmvn$pK[which.max(bcmvn$BCmetric)]),"_",nExp_poi), 
+                                              sct = FALSE)
+    
+    ## Plot results
+    print(DimPlot(seurat.list[[i]], group.by = paste0("DF.classifications_0.25_",as.character(bcmvn$pK[which.max(bcmvn$BCmetric)]),"_",nExp_poi)))
+    print(DimPlot(seurat.list[[i]], group.by = paste0("DF.classifications_0.25_",as.character(bcmvn$pK[which.max(bcmvn$BCmetric)]),"_",nExp_poi.adj)))
+    
+    ## Save results to txt
+    table <- seurat.list[[i]]@meta.data[,6:8]
+    colnames(table) <- c("pANN","DF_classifications_1","DF_classifications_2")
+    write.table(table, file = paste0(base_path, names(seurat.list)[i], file_suffix,"_DoubletFinder.txt"), sep = "\t")
+}
+
+saveRDS(seurat.list,paste0(base_path, "doubletFinder_seurat_list.rds"))
+```
+
+
+
+
+## DoubletFinder, scDblFinder & scdc with SCTransform Preprocessing
+
+```{r, results='hold',warning=FALSE,error=FALSE,message=FALSE}
+# Initialize the Seurat object with the raw (non-normalized data).
+sample_1.seuratSCT <- CreateSeuratObject(counts = sample_1_filtered_x, project = "0", min.cells = 1, min.features = 0)
+sample_2.seuratSCT <- CreateSeuratObject(counts = sample_2_filtered_x, project = "0", min.cells = 1, min.features = 0)
+# sample_3.seuratSCT <- CreateSeuratObject(counts = sample_3_filtered_x, project = "0", min.cells = 1, min.features = 0)
+
+seuratSCT.list <- list(sample_1.seuratSCT, sample_2.seuratSCT)#, sample_3.seuratSCT)
+names(seuratSCT.list) <- sample_names
+
+sceSCT.list <- list()
+
+for (i in 1:length(seuratSCT.list)) {
+    # Basic Preprocessing
+    seuratSCT.list[[i]] <- SCTransform(seuratSCT.list[[i]], verbose = FALSE)
+    seuratSCT.list[[i]] <- RunPCA(seuratSCT.list[[i]], npcs = 50, verbose = FALSE)
+    seuratSCT.list[[i]] <- RunUMAP(seuratSCT.list[[i]], reduction = "pca", dims = 1:50)
+    seuratSCT.list[[i]] <- FindNeighbors(seuratSCT.list[[i]], dims = 1:50, verbose = FALSE)
+    seuratSCT.list[[i]] <- FindClusters(seuratSCT.list[[i]], verbose = FALSE)
+    
+    print(DimPlot(seuratSCT.list[[i]], label = TRUE))
+    
+    #Conversion to SingleCellExperiment
+    sceSCT.list[[i]] <- as.SingleCellExperiment(seuratSCT.list[[i]])
+    
+    #scDblFinder
+    colData(sceSCT.list[[i]])$scoresDoubletDensity <- computeDoubletDensity(sceSCT.list[[i]])
+    sceSCT.list[[i]] <- scDblFinder(sceSCT.list[[i]], clusters = clusters) #, dbr=0.1)
+    
+    # SCDS
+    sceSCT.list[[i]] <- cxds(sceSCT.list[[i]], retRes = TRUE)
+    sceSCT.list[[i]] <- bcds(sceSCT.list[[i]], retRes = TRUE, verb=TRUE)
+    sceSCT.list[[i]] <- cxds_bcds_hybrid(sceSCT.list[[i]])
+    
+    dens <- density(sceSCT.list[[i]]$hybrid_score)
+    min_idx <- match(-1, extract(turnpoints(dens$y, calc.proba = TRUE)))
+    cut_off <- dens$x[min_idx[length(min_idx)]]
+    print("Cut off: ",cut_off)
+    
+    print(ggplot(as.data.frame(colData(sceSCT.list[[i]])), aes(x=hybrid_score)) + geom_density() + geom_vline(xintercept = cut_off, linetype=2))
+    
+    sceSCT.list[[i]]$hybrid_class <- "doublet"
+    sceSCT.list[[i]][,sceSCT.list[[i]]$hybrid_score < cut_off]$hybrid_class <- "singlet"
+    
+    #Plots
+    print(plotUMAP(sceSCT.list[[i]], colour_by="hybrid_score"))
+    print(plotUMAP(sceSCT.list[[i]], colour_by="hybrid_class"))
+    print(plotUMAP(sceSCT.list[[i]], colour_by="scDblFinder.score"))
+    print(plotUMAP(sceSCT.list[[i]], colour_by="scDblFinder.class"))
+    #print(plotUMAP(sceSCT.list[[i]], colour_by="scDblFinder.cluster"))
+    print(plotUMAP(sceSCT.list[[i]], colour_by="Lgr5"))
+    print(plotUMAP(sceSCT.list[[i]], colour_by="Neurog3"))
+    print(plotUMAP(sceSCT.list[[i]], colour_by="Neurod1"))
+    print(plotUMAP(sceSCT.list[[i]], colour_by="Top2a"))
+    print(plotUMAP(sceSCT.list[[i]], colour_by="nCount_RNA"))
+    print(plotUMAP(sceSCT.list[[i]], colour_by="nFeature_RNA"))
+    print(plotUMAP(sceSCT.list[[i]], colour_by="seurat_clusters"))
+    
+    #Save doublets
+    doublets <- colData(sceSCT.list[[i]])[,c("scDblFinder.class", "scDblFinder.score", "hybrid_class", "hybrid_score")]
+    colnames(doublets) <- c("scDblFinder.class.sct", "scDblFinder.score.sct", "hybrid_class_sct", "hybrid_score_sct")
+    write.table(doublets, file = paste0(base_path, names(seuratSCT.list)[i], file_suffix,"_scDblFinder_scds_SCT.txt"), sep = "\t")
+    
+    ## pK Identification (no ground-truth) ---------------------------------------------------------------------------------------
+    sweep.res.list <- paramSweep_v3(seuratSCT.list[[i]], PCs = 1:50, sct = TRUE, num.cores = 64)
+    sweep.stats <- summarizeSweep(sweep.res.list, GT = FALSE)
+    bcmvn <- find.pK(sweep.stats)
+    
+    ## Homotypic Doublet Proportion Estimate -------------------------------------------------------------------------------------
+    homotypic.prop <- modelHomotypic(seuratSCT.list[[i]]@meta.data$seurat_clusters)           ## ex: annotations <- seuratSCT.list[[i]]@meta.data$ClusteringResults
+    nExp_poi <- round(0.1*length(seuratSCT.list[[i]]@meta.data$seurat_clusters))  ## Assuming 7.5% doublet formation rate - tailor for your dataset
+    nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
+    
+    ## Run DoubletFinder with varying classification stringencies ----------------------------------------------------------------
+    seuratSCT.list[[i]] <- doubletFinder_v3(seuratSCT.list[[i]], PCs = 1:50, pN = 0.25, pK = as.numeric(as.character(bcmvn$pK[which.max(bcmvn$BCmetric)])), nExp = nExp_poi, reuse.pANN = FALSE, sct = TRUE)
+    seuratSCT.list[[i]] <- doubletFinder_v3(seuratSCT.list[[i]], PCs = 1:50, pN = 0.25, pK = as.numeric(as.character(bcmvn$pK[which.max(bcmvn$BCmetric)])), nExp = nExp_poi.adj, reuse.pANN = paste0("pANN_0.25_",as.character(bcmvn$pK[which.max(bcmvn$BCmetric)]),"_",nExp_poi), sct = TRUE)
+    
+    ## Plot results
+    print(DimPlot(seuratSCT.list[[i]], group.by = paste0("DF.classifications_0.25_",as.character(bcmvn$pK[which.max(bcmvn$BCmetric)]),"_",nExp_poi)))
+    print(DimPlot(seuratSCT.list[[i]], group.by = paste0("DF.classifications_0.25_",as.character(bcmvn$pK[which.max(bcmvn$BCmetric)]),"_",nExp_poi.adj)))
+    
+    ## Save results to txt
+    table <- seuratSCT.list[[i]]@meta.data[,8:10]
+    colnames(table) <- c("pANN_SCT","DF_SCT_classifications_1","DF_SCT_classifications_2")
+    write.table(table, file = paste0(base_path, names(seuratSCT.list)[i], file_suffix,"_DoubletFinder_SCT.txt"), sep = "\t")
+}
+
+saveRDS(seurat.list,paste0(base_path, "doubletFinder_seurat_sct_list.rds"))
+saveRDS(sce.list,paste0(base_path, "scDblFinder_sce__sct_list.rds"))
+```
+
+
+```{r}
+sessionInfo()
+```

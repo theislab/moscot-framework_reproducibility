@@ -1,0 +1,88 @@
+---
+title: "scMultiome NVF E14.5 Pancreatic Cells - DropletUtils"
+author: "Michael Sterr"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float: true 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+# Setup
+
+```{r}
+# General
+library(tidyverse) # incl. ggplot2
+library(rhdf5)
+library(Matrix)
+library(SingleCellExperiment)
+library(DropletUtils)
+
+# Parallelization
+library(BiocParallel)
+register(MulticoreParam(64, progressbar = TRUE))
+```
+
+```{r}
+samples = c('E14-5','E15-5')
+base_path = '/storage/scRNA-seq/scMultiome_Mouse-Islets_NVF-E14.5_210044/data/cr_arc/cr_count/'
+outs_path = '/outs/'
+
+for(i in 1:length(samples)){
+  path_to_adata = paste0(base_path, samples[i], outs_path, samples[i], "_raw_gex_bc_matrix.h5ad")
+  
+  print(paste0('Loading ',path_to_adata))
+
+  adata <- h5read(path_to_adata, "/", compoundAsDataFrame=FALSE)
+
+  barcodes <- adata$obs$`_index`
+  genes <- adata$var$`_index`
+  counts <- adata$X$data
+  indices <- adata$X$indices
+  pointer <- adata$X$indptr
+
+  print("Construct SingleCellExperiment object as input for DropUtils")
+  sparse_mat <- sparseMatrix(p = as.numeric(pointer), x= as.numeric(counts),  i = as.numeric(indices)+1)
+  sce <- SingleCellExperiment(assays = list(counts = sparse_mat), colData=barcodes)
+  rownames(sce) <- genes
+
+  print("Computing barcode ranks")
+  barcode_ranks <- barcodeRanks(counts(sce))
+
+  print("Run DropUtils")
+  drops <- emptyDrops(counts(sce))
+  rownames(drops) <- colData(sce)$X
+  is_cell <- drops$FDR <= 0.05
+  
+  plot(barcode_ranks$rank, barcode_ranks$total, col=ifelse(is_cell, "firebrick2", "black"), log="xy", xlab="Rank", ylab="Total", main=paste0(samples[i]," (", table(is_cell)['TRUE']," cells)"))
+  o <- order(barcode_ranks$rank)
+  lines(barcode_ranks$rank[o], barcode_ranks$fitted[o], col="red")
+  abline(h=metadata(barcode_ranks)$knee, col="dodgerblue", lty=2)
+  abline(h=metadata(barcode_ranks)$inflection, col="forestgreen", lty=2)
+  legend("bottomleft", lty=2, col=c("dodgerblue", "forestgreen"), legend=c("knee", "inflection"))
+
+  plot(drops$Total, -drops$LogProb, col=ifelse(is_cell, "red", "black"), xlab="Total UMI count", ylab="-Log Probability", main=paste0(samples[i]," (", table(is_cell)['TRUE']," cells)"))
+
+  print("Save output")
+  cell_barcodes <- barcodes[which(is_cell)]
+  write.csv(cell_barcodes, file=paste0(base_path, samples[i], outs_path, samples[i], "_DropletUtils_CellBarcodes.csv"))
+
+  ambient_genes <- drops@metadata$ambient
+  write.csv(data.frame(ambient_genes), file=paste0(base_path, samples[i], outs_path, samples[i], "_DropletUtils_AmbientGenes.csv"))
+  
+  cell_probs <- drops$LogProb
+  write.csv(data.frame(barcodes=rownames(drops), cell_probs=cell_probs), file=paste0(base_path, samples[i], outs_path, samples[i], "_DropletUtils_LogProbabilities.csv"))
+}
+```
+
+```{r}
+sessionInfo()
+```
+
+
