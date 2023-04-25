@@ -1,0 +1,36 @@
+seml:
+    executable: run_off.py  # relative path to the script that contains the experiment
+    conda_environment: n
+    name: moscot_benchmark
+    output_dir: output  # this directory must exist already
+    project_root_dir: .
+
+slurm:
+    experiments_per_job: 1
+    max_simultaneous_jobs: 10
+    sbatch_options:
+        partition: cpu_p
+        mem: 700G
+        cpus-per-task: 8
+        time: 0-06:00  # D-HH:MM
+        nice: 10000
+
+fixed:
+    epsilon: 0.05
+    lambda_1: 1
+    lambda_2: 50
+
+grid:
+    size:
+        type: choice
+        # It breaks for >100, since 100 already uses about 600Gb, then 125k would use about 900GB, which is not an option 
+        # on this cluster
+        options: [25,50,75,100]
+
+
+method_used:
+    grid:
+        method:
+            type: choice
+            #options: ['offline', 'WOT']
+            options: ['WOT']
