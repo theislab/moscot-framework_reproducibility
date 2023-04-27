@@ -50,14 +50,3 @@ Results
 
 
 .. _manuscript: TODO
-.. _moscot: https://moscot-tools.org/
-.. _preprint: https://www.biorxiv.org/content/10.1101/2023.04.14.536867v1
-.. _LineageClass: https://moscot.readthedocs.io/en/latest/genapi/moscot.problems.time.LineageProblem.html
-.. _tree distances: https://moscot.readthedocs.io/en/latest/notebooks/examples/problems/600_leaf_distance.html
-.. _tutorial: https://moscot.readthedocs.io/en/latest/notebooks/tutorials/100_lineage.html
-.. _LineageOT: https://doi.org/10.1038/s41467-021-25133-1
-.. _TedSim: https://doi.org/10.1093/nar/gkac235
-.. _c elegans: https://doi.org/10.1126/science.aax1971
-.. _zebrafish: https://doi.org/10.1038/s41588-022-01129-5
-.. _visualizing: https://moscot.readthedocs.io/en/latest/user.html#module-moscot.plotting
-.. _figshare: https://doi.org/10.6084/m9.figshare.c.6533377.v1
