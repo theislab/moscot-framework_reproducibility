@@ -5,22 +5,82 @@ For reproducibility, the analysis was divided into 3 folders:
 
 <details>
     <summary>0_Data_preparation:  </summary>
-    The data was downloaded from http://tome.gs.washington.edu/ as .RDS files.
     
-   ```MG_XXX_Integration```: Performs Seurat's anchor based batch correction analogous to Qiu et al, using using code obtianed from https://github.com/ChengxiangQiu/tome_code
-  
-   ```MG_XXX_Running_TOME```: Runs TOME using code obtianed from https://github.com/ChengxiangQiu/tome_code. In addittion saving the cell type transitions, we also save the identified neirest neighbors, which will be used in cell-level (cl)TOME
-  
-   ```MG_XXX_RDS_to_anndata```: Contains a notebooks used to transform .RDS objects to anndata objects using SeruatData/Disk. Some annotations are not carried over correctly, which is fixed by running in the notebooks ```MG_06-26-2022_Fix_anndata_annotations.ipynb```
+    The data was downloaded from http://tome.gs.washington.edu/ as .RDS files. It contains the notebooks:
+    
+   * ```MG_XXX_Integration```: Performs Seurat's anchor based batch correction analogous to Qiu et al, using using code obtianed from https://github.com/ChengxiangQiu/tome_code
+   * ```MG_XXX_RDS_to_anndata```: Contains notebooks used to transform .RDS objects to anndata objects using SeruatData/Disk. Some annotations are not carried over correctly, which is fixed by running in the notebooks ```MG_06-26-2022_Fix_anndata_annotations.ipynb``` 
+   * ```MG_XXX_RDS_to_anndata```: 
+   * ```MG_XXX_RDS_to_anndata```: 
 
+</details>
 
+<details>
+    <summary>1_TOME/clTOME_computations</summary>
+    
+    We ran TOME on the integrated data. Default TOME output are cell type transitions. To see if TOME's strategy also results in reasonable coupling on the single cell level we save the neirest neighobrs TOME identifies and transform it into a coupling/transport matrix.
+    
+   * ```MG_XXX_Running_TOME```: Runs TOME using code obtianed from https://github.com/ChengxiangQiu/tome_code. In addittion saving the cell type transitions, we also save the identified neirest neighbors, which will be used in cell-level (cl)TOME
+   * ```MG_XXX_Transforming_Identified_Neigbors_to_Transport_Matrix.ipynb```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_TOME_transport_matrix_to_growth_rates.ipynb```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_TOME_transport_matrix_to_pulls.ipynb```: Notebooks where moscot is applied to the data
     
 </details>
 
 <details>
-    <summary>Data download</summary>
-    The data was downloaded from http://tome.gs.washington.edu/
+    <summary>2_moscot_computations</summary>
+    
+We ran moscot on the integrated data, afterwards we extracted cell type trasitions, grwoth rates and pulls of specific cell types for later evaluation.
+    
+   * ```MG_XXX_Running_moscot```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_moscot_map_to_cell_type_transitions```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_moscot_map_to_growth_rates```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_moscot_map_to_pull```: Notebooks where moscot is applied to the data
 </details>
+
+
+<details>
+    <summary>3_Evaluation</summary>
+
+We evaluated TOME/clTOME and moscot output using 3 different metrics: 
+    
+   * ```MG_XXX_Evalution_of_germ_layer_and_cell_type_transitions```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_Evaluation_of_growth_rates```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_Running_scVI```: scVI was used to infer gene expression using "get_normalized_genes"
+   * ```MG_XXX_Evaluation_of_driver_gene_correlations```: Notebooks where moscot is applied to the data
+    
+</details>
+
+
+<details>
+    <summary>4_Memory_and_runtime_benchmark</summary>
+    
+   * ```MG_XXX_Evalution_of_germ_layer_and_cell_type_transitions```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_Evaluation_of_growth_rates```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_Running_scVI```: scVI was used to infer gene expression using "get_normalized_genes"
+   * ```MG_XXX_Evaluation_of_driver_gene_correlations```: Notebooks where moscot is applied to the data
+    
+</details>
+
+<details>
+    <summary>5_Figure_creation</summary>
+    
+For the main figure:
+    
+   * ```MG_XXX_Memory_and_runtime_plot```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_Germ_layer_and_cell_type_transition_plot```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_E8.0_to_E8.25_UMAPS:and_growth_rate_histogram```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_Driver_gene_correlation_plots```: Notebooks where moscot is applied to the data
+    
+For the supplementary figure:
+    
+   * ```MG_XXX_All_growth_rate_histograms```: Notebooks where moscot is applied to the data
+   * ```MG_XXX_Growth_rate_to_cell_cycle_score_correlations```: Notebooks where moscot is applied to the data
+    
+</details>
+
+
+
 
 ## Rules
 1. Have an **empty line** after the `</summary>` tag or markdown/code blocks will not render.
