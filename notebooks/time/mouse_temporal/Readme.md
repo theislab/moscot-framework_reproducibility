@@ -3,6 +3,7 @@ We applied moscot to a 1.7 M. cells mouse developental atlas. The data was prepr
 For reproducibility, the analysis was divided into 3 folders:
 
 
+## Notebook folders
 <details>
     <summary>0_Data_preparation:  </summary>
     
