@@ -20,7 +20,7 @@ The data was downloaded from http://tome.gs.washington.edu/ as .RDS files. It co
     
 We ran TOME on the integrated data. Default TOME output are cell type transitions. To see if TOME's strategy also results in reasonable coupling on the single cell level we save the neirest neighobrs TOME identifies and transform it into a coupling/transport matrix.
     
-   * ```MG_XXX_Running_TOME```: Runs TOME using code obtianed from https://github.com/ChengxiangQiu/tome_code. In addittion saving the cell type transitions, we also save the identified neirest neighbors, which will be used in cell-level (cl)TOME
+   * ```MG_XXX_Running_TOME```: Runs TOME using code obtianed from https://github.com/ChengxiangQiu/tome_code. In addition to saving the cell type transitions, we also saved TOME's identified neirest neighbors, which will be used in cell-level (cl)TOME
    * ```MG_XXX_Transforming_Identified_Neigbors_to_Transport_Matrix.ipynb```: Notebooks where moscot is applied to the data
    * ```MG_XXX_TOME_transport_matrix_to_growth_rates.ipynb```: Notebooks where moscot is applied to the data
    * ```MG_XXX_TOME_transport_matrix_to_pulls.ipynb```: Notebooks where moscot is applied to the data
