@@ -6,7 +6,7 @@ For reproducibility, the analysis was divided into 3 folders:
 <details>
     <summary>0_Data_preparation:  </summary>
     
-    The data was downloaded from http://tome.gs.washington.edu/ as .RDS files. It contains the notebooks:
+The data was downloaded from http://tome.gs.washington.edu/ as .RDS files. It contains the notebooks:
     
    * ```MG_XXX_Integration```: Performs Seurat's anchor based batch correction analogous to Qiu et al, using using code obtianed from https://github.com/ChengxiangQiu/tome_code
    * ```MG_XXX_RDS_to_anndata```: Contains notebooks used to transform .RDS objects to anndata objects using SeruatData/Disk. Some annotations are not carried over correctly, which is fixed by running in the notebooks ```MG_06-26-2022_Fix_anndata_annotations.ipynb``` 
@@ -18,7 +18,7 @@ For reproducibility, the analysis was divided into 3 folders:
 <details>
     <summary>1_TOME/clTOME_computations</summary>
     
-    We ran TOME on the integrated data. Default TOME output are cell type transitions. To see if TOME's strategy also results in reasonable coupling on the single cell level we save the neirest neighobrs TOME identifies and transform it into a coupling/transport matrix.
+We ran TOME on the integrated data. Default TOME output are cell type transitions. To see if TOME's strategy also results in reasonable coupling on the single cell level we save the neirest neighobrs TOME identifies and transform it into a coupling/transport matrix.
     
    * ```MG_XXX_Running_TOME```: Runs TOME using code obtianed from https://github.com/ChengxiangQiu/tome_code. In addittion saving the cell type transitions, we also save the identified neirest neighbors, which will be used in cell-level (cl)TOME
    * ```MG_XXX_Transforming_Identified_Neigbors_to_Transport_Matrix.ipynb```: Notebooks where moscot is applied to the data
@@ -55,10 +55,10 @@ We evaluated TOME/clTOME and moscot output using 3 different metrics:
 <details>
     <summary>4_Memory_and_runtime_benchmark</summary>
     
-   * ```MG_XXX_Evalution_of_germ_layer_and_cell_type_transitions```: Notebooks where moscot is applied to the data
+We used the time pair with the most cells (E11.5 --> E12.5 with 455,124 cells --> 292,726 cells) and subsampled it such that E11.5 and E12.5 contain the same amount of cells x, where x was chosen in steps of 25,000. Memory and runtime of moscot and low rank version of moscot where compared to WaddingtonOT (PMID: 30712874). Supplementary Table XXX containes the results of this benchmark.
+    
+   * ```yaml_files_and_stuff```: Notebooks where moscot is applied to the data
    * ```MG_XXX_Evaluation_of_growth_rates```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_Running_scVI```: scVI was used to infer gene expression using "get_normalized_genes"
-   * ```MG_XXX_Evaluation_of_driver_gene_correlations```: Notebooks where moscot is applied to the data
     
 </details>
 
