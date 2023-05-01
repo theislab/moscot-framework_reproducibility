@@ -29,28 +29,39 @@ We use the data as provided in [[1]](https://doi.org/10.1016/j.cell.2022.04.003)
   We compute the mapping between the time points using moscot _SpatioTemporalProblem_ and _TemporalProblem_. 
   For _SpatioTemporalProblem_ we run a grid search over the `alpha` values using SLURM.
 
-  To run the grid search call:
-    ```python3 run_mosta_st_map.py```
+  To run the grid search call within the directory:
+    ```python3 run_mosta_st_map_grid.py```
   
    * ```run_st_map.sh```: Script to initialize sbatch runs. 
-   * ```run_mosta_st_map.py```: Main SLURM script to calculate the couplings between the time points.
-   Calling the command `python3 run_mosta_st_map.py` 
+   * ```run_mosta_st_map_grid.py```: Main SLURM script to calculate the couplings between the time points.
+   Calling the command `python3 run_mosta_st_map_grid.py` 
 will instantiate sbatch calls to calculate all couplings over a range of `alpha` values. 
 The accuracy of each mapping is saved as a `.csv` file under `data/space/spatiotemporal/output`.
-   * ```mosta_st_map_accuracies.py```: Main function called by `run_mosta_st_map.sh`. 
+   * ```mosta_st_map_accuracies.py```: Main function called by `run_mosta_st_map_grid.sh`. 
 Evaluates the mapping for the give args and saves the accuracy of the mapping as a `.csv` file under `data/space/spatiotemporal/output`.
    * ```ZP_2023-04-20_spatiotemporal_fullembryo-accuracy.ipynb```: Imports the grid search run and visualizes the mapping accuracy
 
 #### 1_mapping_across_timepoints:
-    Compute the optimal mapping across time points
+  We compute the mapping between the time points using optimal `alpha` values found in `0_grid_search` and save them as `.pkl` files.
+    To run the mapping call:
+    ```python3 run_mosta_st_map_transitions.py```
+  
+   * ```run_st_map.sh```: Script to initialize sbatch runs. 
+   * ```run_mosta_st_map_transitions.py```: Main SLURM script to calculate the couplings between the time points.
+   Calling the command `python3 run_mosta_st_map_transitions.py` 
+will instantiate sbatch calls to calculate couplings the optimal `alpha` values. 
+The mapping as well as push forward of `Heart` cells will be saved as a `.pkl` files under `data/space/spatiotemporal/output`.
+   * ```mosta_st_map_transitions.py```: Main function called by `run_mosta_st_map.sh`. 
+
 </details>
-
-
 
 
 <details>
     <summary>2_Full_embryo_CellRank_analysis  </summary>
     &nbsp;
+
+* ```ZP_2023-04-20_spatiotemporal_fullembryo-cellrank.ipynb```: Imports the mappings computed in 
+`1_Cell_type_transition_analysis/1_mapping_across_timepoints` and uses them to define a CellRank kernel. 
 
 </details>
 
@@ -58,8 +69,6 @@ Evaluates the mapping for the give args and saves the accuracy of the mapping as
 <details>
     <summary>3_Brain_analysis  </summary>
     &nbsp; 
-    
-This folder contains scripts benchmarking memory consumption and running time of WOT, moscot and moscot low rank.
 
 
 #### 0_Brain_mapping:
