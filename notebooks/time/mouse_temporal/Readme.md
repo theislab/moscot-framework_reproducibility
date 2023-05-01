@@ -39,7 +39,7 @@ Contains Seurat integration and conversion of the downloaded .RDS files (http://
 
 <details>
     <summary>1_Cell_type_transition_analysis  </summary>
-Contains Seurat integration and conversion of the downloaded .RDS files (http://tome.gs.washington.edu/) into anndata objects.
+Both moscot and TOME are run on the same latent representation to obtain cell type transition rates, which are then evaluated.
 
 #### 0_TOME:
   
@@ -57,9 +57,43 @@ Contains Seurat integration and conversion of the downloaded .RDS files (http://
    
 #### 2_Validation:
 
+  Evaluating the transitions obtained from TOME and moscot  
+   * ```MG_05-01-2023_Evaluation_of_cell_type_transitions.ipynb```: Uses curated transitions and germ layer annotation (Supplementary Table 1) to calculate validation scores.
+</details>
+
+
+
+
+<details>
+    <summary>2_Growth_rate_and_driver_gene_analysis  </summary>
+To get a more detailed view of transitions on the cell level we extend the kNN-approach intruduced by to to cell-level TOME (clTOME), which is then compared to moscot. For this analyis, extraembryonic tissues (inlcuding Blood progenitors and Primitive erythroid cells until E8.5) have been excluded for gastulation and organogenesis.
+
+
+#### 0_clTOME:
+  
+  Performs integration as done by Qiu et al. It contains the following notebooks:
+  
+   * ```MG_05-01-2023_TOME_Maps_for_growth_rate_and_driver_genes_analysis.ipynb```: Saves the identified neirest neighors obtained while running TOME.
+   * ```MG_05-01-2023_Transforming_Identified_Neigbors_to_Transport_Matrix.ipynb```: Takes the neirest neighors and shapes them into a sparse matrix.
+   * ```MG_05-01-2023_TOME_transport_matrix_to_growth_rates.ipynb```: Uses the neirest neighbor matrix to calculate growth rates.
+   * ```MG_05-01-2023_TOME_transport_matrix_to_pulls.ipynb```: Uses the neirest neighbor matrix to calculate pulls of selected cell types.
+   
+
+#### 1_moscot:
+
+  Runs moscot on the same representation as used in TOME  
+   * ```Run_moscot.py```: Python script running moscot saving the resulting solution.
+   * ```MG_05-01-2023_Check_growth_rates.ipynb```: Loads the calculated solution to inspect growth/apoptisis rates.
+   * ```MG_05-01-2023_moscot_transport_matrix_to_growth_rates.ipynb```: Used the moscot solutions to compute growth rates.
+   * ```MG_05-01-2023_moscot_transport_matrix_to_pulls.ipynb```: Used the moscot solutions to compute pulls of selected cell types.
+   
+   
+#### 2_Validation:
+
   Runs moscot on the same representation as used in TOME  
    * ```MG_05-01-2023_Evaluation_of_cell_type_transitions.ipynb```: Uses curated transitions and germ layer annotation (Supplementary Table 1) to calculate validation scores.
 </details>
+
 
 
 
