@@ -137,7 +137,7 @@ Notebooks to create plots and figures
    * ```MG_05-01-2023_E8_UMAPs.ipynb```: Plots UMAPS of growth rates, pulls and gene expression of E8.0 to E8.25 data.
    * ```MG_05-01-2023_Plotting_marker_gene_correlation.ipynb```: Plots result of driver gene correlations.
    
-#### 0_Supplementary figure:
+#### 1_Supplementary figure:
    * ```MG_05-01-2023_Cell_type_transition_accuracy_time_point_resolved```: Plots result of memory and runtime benchmark.
    * ```MG_05-01-2023_Illustrate_growth_rates.ipynb```: Plots computed growth rates for all time pairs.
 
