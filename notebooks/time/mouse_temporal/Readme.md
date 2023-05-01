@@ -6,6 +6,8 @@ We applied moscot to a 1.7 M. cells mouse developental atlas. moscot was compare
 
 <details>
     <summary>0_Data_preparation  </summary>
+    &nbsp; 
+    
 Contains Seurat integration and conversion of the downloaded .RDS files (http://tome.gs.washington.edu/) into anndata objects.
 
 #### 0_Integration_notebooks:
@@ -34,7 +36,9 @@ Contains Seurat integration and conversion of the downloaded .RDS files (http://
 
 <details>
     <summary>1_Cell_type_transition_analysis  </summary>
-Both moscot and TOME are run on the same latent representation to obtain cell type transition rates, which are then evaluated.
+    &nbsp; 
+    
+Both moscot and TOME were run on the same latent representation to obtain cell type transition rates, which are then evaluated.
 
 #### 0_TOME:
   
@@ -61,6 +65,8 @@ Both moscot and TOME are run on the same latent representation to obtain cell ty
 
 <details>
     <summary>2_Growth_rate_and_driver_gene_analysis  </summary>
+    &nbsp; 
+    
 To get a more detailed view of transitions on the cell level we extend the kNN-approach intruduced by to to cell-level TOME (clTOME), which is then compared to moscot. For this analyis, extraembryonic tissues (inlcuding Blood progenitors and Primitive erythroid cells until E8.5) have been excluded for gastulation and organogenesis.
 
 
@@ -101,7 +107,9 @@ To get a more detailed view of transitions on the cell level we extend the kNN-a
 
 <details>
     <summary>3_Memory_and_runtime_benchmark  </summary>
-Benchmarking memory consumption and running time of WOT, moscot and moscot low rank.
+    &nbsp; 
+    
+This folder contains scripts benchmarking memory consumption and running time of WOT, moscot and moscot low rank.
 
 
 #### 0_Subsampling:
@@ -118,6 +126,8 @@ Benchmarking memory consumption and running time of WOT, moscot and moscot low r
 
 <details>
     <summary>4_Figures  </summary>
+    &nbsp; 
+    
 Notebooks to create plots and figures
 
    * ```MG_05-01-2023_Memory_and_runtime_benchmark.ipynb```: Plots result of memory and runtime benchmark.
