@@ -90,11 +90,13 @@ To get a more detailed view of transitions on the cell level we extend the kNN-a
    
 #### 2_Validation:
 
-  Runs moscot on the same representation as used in TOME  
-   * ```MG_05-01-2023_Evaluation_of_cell_type_transitions.ipynb```: Uses curated transitions and germ layer annotation (Supplementary Table 1) to calculate validation scores.
+  Evaluates obtained growth rates and cell type pulls
+  
+   * 0_scVI_computations: Contains 1 notebook running scVI to obtain scVI normalized gene expression.
+   * 1_Driver_gene_correlations: Contains 4 notebooks calculating correlation of scVI normalized gene expression to cell type pulls.
+   * 2_Growth_rate_correlations: Contains 2 notebooks used to calculate correlation of obtained growth rates to cell cycle scores.
+   
 </details>
-
-
 
 
 
@@ -103,72 +105,30 @@ To get a more detailed view of transitions on the cell level we extend the kNN-a
 
 
 <details>
-    <summary>1_TOME/clTOME_computations</summary>
-    
-We ran TOME on the integrated data. Default TOME output are cell type transitions. To see if TOME's strategy also results in reasonable coupling on the single cell level we save the neirest neighobrs TOME identifies and transform it into a coupling/transport matrix.
-    
-   * ```MG_XXX_Running_TOME```: Runs TOME using code obtianed from https://github.com/ChengxiangQiu/tome_code. In addition to saving the cell type transitions, we also saved TOME's identified neirest neighbors, which will be used in cell-level (cl)TOME
-   * ```MG_XXX_Transforming_Identified_Neigbors_to_Transport_Matrix.ipynb```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_TOME_transport_matrix_to_growth_rates.ipynb```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_TOME_transport_matrix_to_pulls.ipynb```: Notebooks where moscot is applied to the data
-    
-</details>
+    <summary>3_Memory_and_runtime_benchmark  </summary>
+Benchmarking memory consumption and running time of WOT, moscot and moscot low rank.
 
-<details>
-    <summary>2_moscot_computations</summary>
-    
-We ran moscot on the integrated data, afterwards we extracted cell type trasitions, grwoth rates and pulls of specific cell types for later evaluation.
-    
-   * ```MG_XXX_Running_moscot```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_moscot_map_to_cell_type_transitions```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_moscot_map_to_growth_rates```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_moscot_map_to_pull```: Notebooks where moscot is applied to the data
+
+#### 0_Subsampling:
+  
+  Subsamples cells from the biggest time pair into anndata objects.
+  
+   * ```MG_05-01-2023_E11.5_subsampling```: Subsamples such that earlier and later time point both contain the same amount of cells, which increases in steps of 25,000, starting form 0, up to 275,000 cells.
+
+#### 1_Scripts:
+  Contains python scripts and yaml_files with which the benchmark has been performed. For each yaml file the exists the corresponding python scirpt (e.g. bm_CPU_offline.yml and run_cpu_offline.py).
+
 </details>
 
 
 <details>
-    <summary>3_Evaluation</summary>
+    <summary>4_Figures  </summary>
+Notebooks to create plots and figures
 
-We evaluated TOME/clTOME and moscot output using 3 different metrics: 
-    
-   * ```MG_XXX_Evalution_of_germ_layer_and_cell_type_transitions```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_Evaluation_of_growth_rates```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_Running_scVI```: scVI was used to infer gene expression using "get_normalized_genes"
-   * ```MG_XXX_Evaluation_of_driver_gene_correlations```: Notebooks where moscot is applied to the data
-    
+   * ```MG_05-01-2023_Memory_and_runtime_benchmark.ipynb```: Plots result of memory and runtime benchmark.
+   * ```MG_05-01-2023_Cell_type_transition_accuracy.ipynb```: Plots result of cell type transition analysis.
+   * ```MG_05-01-2023_E8_UMAPs.ipynb```: Plots UMAPS of growth rates, pulls and gene expression of E8.0 to E8.25 data.
+   * ```MG_05-01-2023_Plotting_marker_gene_correlation.ipynb```: Plots result of driver gene correlations.
+   * ```MG_05-01-2023_Illustrate_growth_rates.ipynb```: Plots computed growth rates for all time pairs.
+
 </details>
-
-
-<details>
-    <summary>4_Memory_and_runtime_benchmark</summary>
-    
-We used the time pair with the most cells (E11.5 --> E12.5 with 455,124 cells --> 292,726 cells) and subsampled it such that E11.5 and E12.5 contain the same amount of cells x, where x was chosen in steps of 25,000. Memory and runtime of moscot and low rank version of moscot where compared to WaddingtonOT (PMID: 30712874). Supplementary Table XXX containes the results of this benchmark.
-    
-   * ```yaml_files_and_stuff```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_Evaluation_of_growth_rates```: Notebooks where moscot is applied to the data
-    
-</details>
-
-<details>
-    <summary>5_Figure_creation</summary>
-    
-For the main figure:
-    
-   * ```MG_XXX_Memory_and_runtime_plot```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_Germ_layer_and_cell_type_transition_plot```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_E8.0_to_E8.25_UMAPS:and_growth_rate_histogram```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_Driver_gene_correlation_plots```: Notebooks where moscot is applied to the data
-    
-For the supplementary figure:
-    
-   * ```MG_XXX_All_growth_rate_histograms```: Notebooks where moscot is applied to the data
-   * ```MG_XXX_Growth_rate_to_cell_cycle_score_correlations```: Notebooks where moscot is applied to the data
-    
-</details>
-
-
-
-
-## Rules
-1. Have an **empty line** after the `</summary>` tag or markdown/code blocks will not render.
-1. Have an **empty line** after each `</details>` tag if you have multiple collapsible sections.
