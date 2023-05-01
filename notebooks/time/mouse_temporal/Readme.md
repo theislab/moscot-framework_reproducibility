@@ -1,20 +1,72 @@
 ## Moscot enables atlas-scale temporal mapping of mouse embryogenesis
 We applied moscot to a 1.7 M. cells mouse developental atlas. The data was preprocessed, annotated and partially created/ sequenced deeper by Qiu et al. (https://www.nature.com/articles/s41588-022-01018-x)
-For reproducibility, the analysis was divided into 3 folders:
+For reproducibility, the analysis was divided into 5 folders:
 
 
 ## Notebook folders
-<details>
-    <summary>0_Data_preparation:  </summary>
-    
-The data was downloaded from http://tome.gs.washington.edu/ as .RDS files. It contains the notebooks:
-    
-   * ```MG_XXX_Integration```: Performs Seurat's anchor based batch correction analogous to Qiu et al, using using code obtianed from https://github.com/ChengxiangQiu/tome_code
-   * ```MG_XXX_RDS_to_anndata```: Contains notebooks used to transform .RDS objects to anndata objects using SeruatData/Disk. Some annotations are not carried over correctly, which is fixed by running in the notebooks ```MG_06-26-2022_Fix_anndata_annotations.ipynb``` 
-   * ```MG_XXX_RDS_to_anndata```: 
-   * ```MG_XXX_RDS_to_anndata```: 
 
+
+
+
+
+<details>
+    <summary>0_Data_preparation  </summary>
+Contains Seurat integration and conversion of the downloaded .RDS files (http://tome.gs.washington.edu/) into anndata objects.
+
+#### 0_Integration_notebooks:
+  
+  Runs TOME on the integrated data as done by Qiu et al. It contains the following notebooks:
+  
+   * ```MG_05-01-2023_Seurat_Integartion.ipynb```: Performs Seurat's anchor based batch correction analogous to Qiu et al, using using code obtained from https://github.com/ChengxiangQiu/tome_code
+   * ```MG_05-01-2023_Seurat_Integartion_E8.5b-E9.5_Redone.ipynb```: Performs the same integration, but using 3000 hvgs instead of 2000hvgs since integration with 2000 hvgs was not able to separate nerual crest and allantois sufficiently
+
+#### 1_Seurat_object_to_anndata_notebooks:
+
+  Transforms the downloaded .RDS objects into anndata objects, which are then concatenated and the intefration result is added.
+  
+   * ```MG_05-01-2023_Seurat_object_to_anndata.ipynb```: Runs SeuratDisk/Data to transform .RDS into anndata objects
+   * ```MG_05-01-2023_Ensemble_to_gene_symbol.ipynb```: Uses Biomart to construct a dictionary translating ENSEMBL IDs to gene symbols
+   * ```MG_05-01-2023_Fix_anndata_annotations.ipynb```: Metadata is not transformed correctly by SeuratDisk/Data. This is fixed here, and further annotations are added.
+   * ```MG_05-01-2023_Concatenate_time_pair_anndatas.ipynb```: Anndatas of adjacent time points are concatenated and the latent representation obtained from the integration is added
+   * ```MG_05-01-2023_adata_to_obs.ipynb```: Saves the Anndata annotation, which is needed when defining growth rates in the case when TOME has been run on the data where extraembryonic tissues have been removed.
 </details>
+
+
+
+
+
+
+
+<details>
+    <summary>1_Cell_type_transition_analysis  </summary>
+Contains Seurat integration and conversion of the downloaded .RDS files (http://tome.gs.washington.edu/) into anndata objects.
+
+#### 0_TOME:
+  
+  Performs integration as done by Qiu et al. It contains the following notebooks:
+  
+   * ```MG_05-01-2023_TOME_Maps_for_cell_type_transitions```: Runs TOME as in  https://github.com/ChengxiangQiu/tome_code.
+
+#### 1_moscot:
+
+  Runs moscot on the same representation as used in TOME  
+   * ```Run_moscot.py```: Python script running moscot saving the resulting solution.
+   * ```MG_05-01-2023_Check_growth_rates.ipynb```: Loads the calculated solution to inspect growth/apoptisis rates.
+   * ```MG_05-01-2023_moscot_transport_matrix_to_cell_type_transitions.ipynb```: Used the moscot solutions to compute cell type transition rates.
+   
+   
+#### 2_Validation:
+
+  Runs moscot on the same representation as used in TOME  
+   * ```MG_05-01-2023_Evaluation_of_cell_type_transitions.ipynb```: Uses curated transitions and germ layer annotation (Supplementary Table 1) to calculate validation scores.
+</details>
+
+
+
+
+
+
+
 
 <details>
     <summary>1_TOME/clTOME_computations</summary>
