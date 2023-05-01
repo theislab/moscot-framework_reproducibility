@@ -77,6 +77,7 @@ To get a more detailed view of transitions on the cell level we extend the kNN-a
    * ```MG_05-01-2023_TOME_Maps_for_growth_rate_and_driver_genes_analysis.ipynb```: Saves the identified neirest neighors obtained while running TOME.
    * ```MG_05-01-2023_Transforming_Identified_Neigbors_to_Transport_Matrix.ipynb```: Takes the neirest neighors and shapes them into a sparse matrix.
    * ```MG_05-01-2023_TOME_transport_matrix_to_growth_rates.ipynb```: Uses the neirest neighbor matrix to calculate growth rates.
+   * ```MG_05-01-2023_TOME_apoptosis_rates```: Calculates apoptosis rate out of growth rates.
    * ```MG_05-01-2023_TOME_transport_matrix_to_pulls.ipynb```: Uses the neirest neighbor matrix to calculate pulls of selected cell types.
    
 
