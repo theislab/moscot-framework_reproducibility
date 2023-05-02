@@ -60,6 +60,8 @@ The mapping as well as push forward of `Heart` cells will be saved as a `.pkl` f
     <summary>2_Full_embryo_CellRank_analysis  </summary>
     &nbsp;
 
+* ```ZP_2023-04-20_spatiotemporal_fullembryo-heart.ipynb```: Imports the heart push forwards computed in 
+`1_Cell_type_transition_analysis/1_mapping_across_timepoints` and uses them to visualize the heart cell mappings. 
 * ```ZP_2023-04-20_spatiotemporal_fullembryo-cellrank.ipynb```: Imports the mappings computed in 
 `1_Cell_type_transition_analysis/1_mapping_across_timepoints` and uses them to define a CellRank kernel. 
 
@@ -72,10 +74,21 @@ The mapping as well as push forward of `Heart` cells will be saved as a `.pkl` f
 
 
 #### 0_Brain_mapping:
-
-   * ```.ipynb```: 
+  We compute the mapping between the brian cells across time points.
+    To run the mapping call:
+    ```python3 run_mosta_st_map_brain.py```
+  
+   * ```run_st_map.sh```: Script to initialize sbatch runs. 
+   * ```run_mosta_st_map_brain.py```: Main SLURM script to calculate the couplings between the time points.
+   Calling the command `python3 run_mosta_st_map_brain.py` 
+The mapping will be saved as a `.pkl` files under `data/space/spatiotemporal/output_brain`.
+   * ```mosta_st_map_brain.py```: Main function called by `run_mosta_st_map_brain.sh`. 
+   * ```ZP_2023-04-20_spatiotemporal_brain-label.ipynb```: Imports the mappings and transfers the cell type 
+annotation (labels cells at earlier time points). 
 
 #### 1_CellRank_analysis:
+* ```ZP_2023-04-20_spatiotemporal_brain-cellrank.ipynb```: Imports the mappings computed in 
+`0_Brain_mapping` and uses them to define a CellRank kernel. 
 
 </details>
 
