@@ -32,10 +32,27 @@ Contains Seurat integration and conversion of the downloaded .RDS files (http://
 
 
 
+<details>
+    <summary>1_Memory_and_runtime_benchmark  </summary>
+    &nbsp; 
+    
+This folder contains scripts benchmarking memory consumption and running time of WOT, moscot and moscot low rank.
+
+
+#### 0_Subsampling:
+  
+  Subsamples cells from the biggest time pair into anndata objects.
+  
+   * ```MG_05-01-2023_E11.5_subsampling```: Subsamples such that earlier and later time point both contain the same amount of cells, which increases in steps of 25,000, starting form 0, up to 275,000 cells.
+
+#### 1_Scripts:
+  Contains python scripts and yaml_files with which the benchmark has been performed. For each yaml file the exists the corresponding python scirpt (e.g. bm_CPU_offline.yml and run_cpu_offline.py).
+
+</details>
 
 
 <details>
-    <summary>1_Cell_type_transition_analysis  </summary>
+    <summary>2_Cell_type_transition_analysis  </summary>
     &nbsp; 
     
 Both moscot and TOME were run on the same latent representation to obtain cell type transition rates, which are then evaluated.
@@ -64,13 +81,13 @@ Both moscot and TOME were run on the same latent representation to obtain cell t
 
 
 <details>
-    <summary>2_Growth_rate_and_driver_gene_analysis  </summary>
+    <summary>3_Growth_rate_and_driver_gene_analysis  </summary>
     &nbsp; 
     
-To get a more detailed view of transitions on the cell level we extend the kNN-approach intruduced by to to cell-level TOME (clTOME), which is then compared to moscot. For this analyis, extraembryonic tissues (inlcuding Blood progenitors and Primitive erythroid cells until E8.5) have been excluded for gastulation and organogenesis.
+To get a more detailed view of transitions on the cell level we extend the kNN-approach intruduced by to to cell-level TOME (cl-TOME), which is then compared to moscot. For this analyis, extraembryonic tissues (inlcuding Blood progenitors and Primitive erythroid cells until E8.5) have been excluded for gastulation and organogenesis.
 
 
-#### 0_clTOME:
+#### 0_cl-TOME:
   
   Performs integration as done by Qiu et al. It contains the following notebooks:
   
@@ -101,28 +118,6 @@ To get a more detailed view of transitions on the cell level we extend the kNN-a
 </details>
 
 
-
-
-
-
-
-<details>
-    <summary>3_Memory_and_runtime_benchmark  </summary>
-    &nbsp; 
-    
-This folder contains scripts benchmarking memory consumption and running time of WOT, moscot and moscot low rank.
-
-
-#### 0_Subsampling:
-  
-  Subsamples cells from the biggest time pair into anndata objects.
-  
-   * ```MG_05-01-2023_E11.5_subsampling```: Subsamples such that earlier and later time point both contain the same amount of cells, which increases in steps of 25,000, starting form 0, up to 275,000 cells.
-
-#### 1_Scripts:
-  Contains python scripts and yaml_files with which the benchmark has been performed. For each yaml file the exists the corresponding python scirpt (e.g. bm_CPU_offline.yml and run_cpu_offline.py).
-
-</details>
 
 
 <details>
