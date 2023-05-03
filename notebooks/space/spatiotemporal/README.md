@@ -41,6 +41,8 @@ The accuracy of each mapping is saved as a `.csv` file under `data/space/spatiot
 Evaluates the mapping for the give args and saves the accuracy of the mapping as a `.csv` file under `data/space/spatiotemporal/output`.
    * ```ZP_2023-04-20_spatiotemporal_fullembryo-accuracy.ipynb```: Imports the grid search run and visualizes the mapping accuracy
 
+Files:
+- requires `MOSTA_curated_transitions.csv` (Supplementary table 5 in Klein et al. (2023))
 #### 1_mapping_across_timepoints:
   We compute the mapping between the time points using optimal `alpha` values found in `0_grid_search` and save them as `.pkl` files.
     To run the mapping call:
@@ -52,6 +54,8 @@ Evaluates the mapping for the give args and saves the accuracy of the mapping as
 will instantiate sbatch calls to calculate couplings the optimal `alpha` values. 
 The mapping as well as push forward of `Heart` cells will be saved as a `.pkl` files under `data/space/spatiotemporal/output`.
    * ```mosta_st_map_transitions.py```: Main function called by `run_mosta_st_map.sh`. 
+   * ```ZP_2023-04-20_spatiotemporal_fullembryo-heart.ipynb```: Imports the heart push forwards computed in 
+`1_Cell_type_transition_analysis/1_mapping_across_timepoints` and uses them to visualize the heart cell mappings. 
 
 </details>
 
@@ -60,8 +64,6 @@ The mapping as well as push forward of `Heart` cells will be saved as a `.pkl` f
     <summary>2_Full_embryo_CellRank_analysis  </summary>
     &nbsp;
 
-* ```ZP_2023-04-20_spatiotemporal_fullembryo-heart.ipynb```: Imports the heart push forwards computed in 
-`1_Cell_type_transition_analysis/1_mapping_across_timepoints` and uses them to visualize the heart cell mappings. 
 * ```ZP_2023-04-20_spatiotemporal_fullembryo-cellrank.ipynb```: Imports the mappings computed in 
 `1_Cell_type_transition_analysis/1_mapping_across_timepoints` and uses them to define a CellRank kernel. 
 

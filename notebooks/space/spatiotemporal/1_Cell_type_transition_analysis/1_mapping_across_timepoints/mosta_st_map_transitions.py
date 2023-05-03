@@ -112,7 +112,7 @@ def solve(args):
                     return_data=True
                 )
             fname_push = DATA_DIR + f"output_res/mouse_embryo_eps_{args.epsilon}_rank_{args.rank}_gamma_{gamma}_alpha_{args.alpha}_tp_{args.tps_couple}_heart_push.pkl"
-            pd.DataFrame(df_push[end], index=prob[start, end].adata_tgt.obs_names).to_pickle(fname_push)
+            pd.DataFrame(df_push[end], index=stp[start, end].adata_tgt.obs_names).to_pickle(fname_push)
 
             tmat = sparsify(stp=stp.solutions[list(stp.solutions.keys())[0]], threshold="Auto")
             fname_tmat = DATA_DIR + f"output_res/mouse_embryo_eps_{args.epsilon}_rank_{args.rank}_gamma_{gamma}_alpha_{args.alpha}_tp_{args.tps_couple}_stp.pkl"
