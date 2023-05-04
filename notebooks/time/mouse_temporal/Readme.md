@@ -113,7 +113,7 @@ To get a more detailed view of transitions on the cell level we extend the kNN-a
   
    * 0_scVI_computations: Contains 1 notebook running scVI to obtain scVI normalized gene expression.
    * 1_Driver_gene_correlations: Contains 4 notebooks calculating correlation of scVI normalized gene expression to cell type pulls.
-   * 2_Growth_rate_correlations: Contains 2 notebooks used to calculate correlation of obtained growth rates to cell cycle scores.
+   * 2_Apoptosis_rates: Contains 1 notebook calculating apoptosis rates for both moscot and cl-TOME.
    
 </details>
 
@@ -133,7 +133,6 @@ Notebooks to create plots and figures
    * ```MG_05-01-2023_Plotting_marker_gene_correlation.ipynb```: Plots result of driver gene correlations.
    
 #### 1_Supplementary figure:
-   * ```MG_05-01-2023_Cell_type_transition_accuracy_time_point_resolved```: Plots result of memory and runtime benchmark.
    * ```MG_05-01-2023_Illustrate_growth_rates.ipynb```: Plots computed growth rates for all time pairs.
 
 
