@@ -1,5 +1,5 @@
 ## Moscot enables atlas-scale temporal mapping of mouse embryogenesis
-We applied moscot to a 1.7 M. cells mouse developental atlas. moscot was compared to TOME [[1]](https://www.nature.com/articles/s41588-022-01018-x), using 3 validation metrics: cell type transition accuracy, cellular growth rates and driver gene correlations.
+We applied moscot to a 1.7 M. cells mouse developental atlas. moscot was compared to TOME [[1]](https://www.nature.com/articles/s41588-022-01018-x), using 3 validation metrics: cell type transition accuracy, cellular growth rates and driver gene correlations. Additionally, a memory and runtime analyisis comparing Waddingtom OT [[2]](https://www.sciencedirect.com/science/article/pii/S009286741930039X?via%3Dihub), moscot and moscot-low rank approaches was conducted.
 
 ## Notebook folders
 
@@ -142,4 +142,6 @@ Notebooks to create plots and figures
 
 
 
-[[1] Qiu et al.,  "Systematic reconstruction of cellular trajectories across mouse embryogenesis." Nat Genet (2022)](https://www.nature.com/articles/s41588-022-01018-x) 
+[[1] Qiu et al.,  "Systematic reconstruction of cellular trajectories across mouse embryogenesis." Nat Genet (2022)](https://www.nature.com/articles/s41588-022-01018-x) <br> 
+[[2] Schiebinger et al.,  "Optimal-Transport Analysis of Single-Cell Gene Expression Identifies Developmental Trajectories in Reprogramming." Cell (2019)](https://www.nature.com/articles/s41588-022-01018-x) 
+
