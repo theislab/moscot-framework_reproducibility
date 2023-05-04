@@ -1,4 +1,4 @@
-## Moscot enables atlas-scale temporal mapping of mouse embryogenesis
+## Recovering trajectories of mouse embryogenesis on a developmental atlas using moscot
 We applied moscot to a 1.7 M. cells mouse developental atlas [[1]](https://www.nature.com/articles/s41588-022-01018-x). First we conducted a memory and runtime analyisis comparing moscot to Waddington OT [[2]](https://www.sciencedirect.com/science/article/pii/S009286741930039X?via%3Dihub) and moscot low-rank approaches. Then we benchmarked the performance of moscot and TOME [[1]](https://www.nature.com/articles/s41588-022-01018-x) using 3 validation metrics: cell type transition accuracy, cellular growth rates and driver gene correlations. 
 
 ## Notebook folders
