@@ -15,7 +15,7 @@ Contains Seurat integration and conversion of the downloaded .RDS files (http://
   Runs TOME on the integrated data as done by Qiu et al. It contains the following notebooks:
   
    * ```MG_05-01-2023_Seurat_Integartion.ipynb```: Performs Seurat's anchor based batch correction analogous to Qiu et al, using using code obtained from https://github.com/ChengxiangQiu/tome_code
-   * ```MG_05-01-2023_Seurat_Integartion_E8.5b-E9.5_Redone.ipynb```: Performs the same integration, but using 3000 hvgs instead of 2000hvgs since integration with 2000 hvgs was not able to separate nerual crest and allantois sufficiently
+   * ```MG_05-01-2023_Seurat_Integartion_E8.5b-E9.5_Redone.ipynb```: Performs the same integration, but using 3000 hvgs instead of 2000 hvgs since integration with 2000 hvgs was not able to separate nerual crest and allantois sufficiently
 
 #### 1_Seurat_object_to_anndata_notebooks:
 
