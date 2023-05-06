@@ -84,7 +84,7 @@ Both moscot and TOME were run on the same latent representation to obtain cell t
     <summary>3_Growth_rate_and_driver_gene_analysis  </summary>
     &nbsp; 
     
-To get a more detailed view of transitions on the cell level we extend the kNN-approach intruduced by to to cell-level TOME (cl-TOME), which is then compared to moscot. For this analyis, extraembryonic tissues (inlcuding Blood progenitors and Primitive erythroid cells until E8.5) have been excluded for gastulation and organogenesis.
+To get a more detailed view of transitions on the cell level we extend the kNN-approach intruduced by to to cell-level TOME (cl-TOME), which is then compared to moscot. For this analyis, extraembryonic tissues (inlcuding blood progenitors and primitive erythroid cells until E8.5) have been excluded for the stages gastulation and organogenesis.
 
 
 #### 0_cl-TOME:
