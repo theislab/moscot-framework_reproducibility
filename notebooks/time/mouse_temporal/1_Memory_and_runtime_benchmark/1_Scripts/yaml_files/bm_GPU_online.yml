@@ -1,0 +1,57 @@
+seml:
+    executable: run_gpu_online.py  # relative path to the script that contains the experiment
+    conda_environment: n
+    name: moscot_benchmark
+    output_dir: output  # this directory must exist already
+    project_root_dir: .
+
+slurm:
+    experiments_per_job: 1
+    max_simultaneous_jobs: 10
+    sbatch_options_template: GPU
+    sbatch_options:
+        partition: gpu_p
+        qos: gpu
+        mem: 32G
+        cpus-per-task: 6
+        time: 2-00:00  # D-HH:MM
+        nice: 10000
+        exclude: supergpu02pxe,supergpu03pxe,gpusrv13,gpusrv11,gpusrv10,gpusrv15,gpusrv16,gpusrv17
+        
+
+fixed:
+    epsilon: 0.005
+    lambda_1: 0.1
+    lambda_2: 100
+    batch_size: 1000
+    
+
+grid:
+    size:
+        type: choice
+        options: [25,50,75,100,125,150,175,200,225,250,275]
+
+
+method_used:
+    grid:
+        method:
+            type: choice
+            options: ['online', 'LR_50', 'LR_200', 'LR_500', 'LR_2000']
+            #options: ['LR_50']
+
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        
