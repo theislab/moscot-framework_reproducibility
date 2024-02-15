@@ -1,7 +1,0 @@
-Could not override 'initializer'.
-To append to your config use +initializer=k-means
-Key 'initializer' is not in struct
-    full_key: initializer
-    object_type=dict
-
-Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

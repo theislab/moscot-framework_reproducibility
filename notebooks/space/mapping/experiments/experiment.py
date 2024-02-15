@@ -54,6 +54,9 @@ def benchmark(cfg):
     from ott.problems.linear import linear_problem
     from ott.solvers.linear import univariate
     import jax.numpy as jnp
+    from jax.config import config
+
+    config.update("jax_enable_x64", True)
 
     unique_id = HydraConfig.get().job.override_dirname
     path_results = Path(cfg.paths.path_results) / unique_id
@@ -67,8 +70,8 @@ def benchmark(cfg):
 
     from moscot.problems.space import MappingProblem
 
-    sc.pp.subsample(adata_sc, fraction=0.1)
-    sc.pp.subsample(adata_spatial, fraction=0.1)
+    # sc.pp.subsample(adata_sc, fraction=0.1)
+    # sc.pp.subsample(adata_spatial, fraction=0.1)
     mp = MappingProblem(adata_sc, adata_spatial).prepare(
         sc_attr={"attr": "obsm", "key": cfg.moscot.sc_attr},
         joint_attr={"attr": "X"},
@@ -128,15 +131,18 @@ def benchmark(cfg):
     adata_pred = mp.impute(var_names=var_names, device="cpu")
 
     pred_df = sc.get.obs_df(adata_pred, keys=var_names)
-    true_df = sc.get.obs_df(adata_sc, keys=var_names)
+    true_df = sc.get.obs_df(adata_spatial, keys=var_names)
     np.testing.assert_array_equal(pred_df.columns, true_df.columns)
     corr_results = _corr_results(true_df, pred_df)
+    corr_results.to_csv(path_results / "corr_results.csv")
+
 
     # impute annotation
     dummy = pd.get_dummies(adata_sc.obs["annot"])
     temp = mp[("src", "tgt")].pull(dummy, scale_by_marginals=True)
     clusters = pd.Categorical([dummy.columns[i] for i in np.array(temp.argmax(1))])
     adata_spatial_prot.obs["celltype_mapped"] = clusters
+    
     results = {"time": end_time - start_time}
 
     # get results
