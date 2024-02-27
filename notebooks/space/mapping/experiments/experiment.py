@@ -82,6 +82,7 @@ def benchmark(cfg):
     )
 
     start_time = datetime.now()
+
     mp = mp.solve(
         alpha=cfg.moscot.alpha,
         rank=cfg.moscot.rank,
@@ -90,7 +91,8 @@ def benchmark(cfg):
         initializer=cfg.moscot.initializer,
         tau_a=cfg.moscot.tau_a,
         tau_b=1,
-        max_iterations=40_000,
+        min_iterations=10_000,
+        max_iterations=100_000,
         threshold=1e-20,
     )
     end_time = datetime.now()

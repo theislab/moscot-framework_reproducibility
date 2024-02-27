@@ -8,8 +8,8 @@
 #SBATCH -t 1:00:00
 #SBATCH --mem 20G
 
-source ~/.bashrc
+source ~/.zshrc
 conda activate moscot
 
-unset SLURM_CPU_BIND
+# unset SLURM_CPU_BIND
 python experiment.py --multirun launcher=icb

@@ -18,7 +18,7 @@ moscot:
     rank: 10
     epsilon: 0
     gamma: 1
-    initializer: "k-means"
+    initializer: k-means
     tau_a: 1
 
 hydra:
@@ -26,14 +26,9 @@ hydra:
         name: mapping_protein
     sweeper:
         params:
-            moscot.alpha: 0.3, 0.1
+            moscot.alpha: 0.3 #, 0.1
             moscot.rank: 300
-            moscot.sc_attr: X_pca, X_pca_cite
-            moscot.gamma: 1, 10, 100
-            moscot.initializer: k-means, random
-            moscot.tau_a: 1, 0.5, 0.2, 0.1
-# launcher=icb,moscot.alpha=0.3,moscot.gamma=100,moscot.initializer=random,moscot.rank=200,moscot.sc_attr=X_pca,moscot.tau_a=1
-# launcher=icb,moscot.alpha=0.3,moscot.gamma=100,moscot.initializer=k-means,moscot.rank=200,moscot.sc_attr=X_pca,moscot.tau_a=1
-# launcher=icb,moscot.alpha=0.1,moscot.gamma=100,moscot.initializer=random,moscot.rank=200,moscot.sc_attr=X_pca,moscot.tau_a=1
-# launcher=icb,moscot.alpha=0.1,moscot.gamma=100,moscot.initializer=k-means,moscot.rank=200,moscot.sc_attr=X_pca,moscot.tau_a=1
-# launcher=icb,moscot.alpha=0.1,moscot.gamma=100,moscot.initializer=k-means,moscot.rank=200,moscot.sc_attr=X_pca_cite,moscot.tau_a=1
+            moscot.sc_attr: X_pca #, X_pca_cite
+            moscot.gamma: 10 #, 10, 100
+            moscot.initializer: random, k-means, rank2
+            moscot.tau_a: 1 #, 0.5, 0.2, 0.1
