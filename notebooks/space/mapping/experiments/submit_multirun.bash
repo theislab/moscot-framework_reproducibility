@@ -8,8 +8,9 @@
 #SBATCH -t 1:00:00
 #SBATCH --mem 20G
 
-source ~/.zshrc
+source ~/.bashrc
 conda activate moscot
 
-# unset SLURM_CPU_BIND
+export HYDRA_FULL_ERROR=1
+unset SLURM_CPU_BIND
 python experiment.py --multirun launcher=icb

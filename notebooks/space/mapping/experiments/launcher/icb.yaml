@@ -10,7 +10,7 @@ hydra:
         cpus_per_task: 6
         mem_gb: 90
         gres: gpu:1
-        timeout_min: 480
+        timeout_min: 1440
         array_parallelism: 10
         name: mapping_multimodal
-        constraint: a100_40gb
+        constraint: a100_80gb

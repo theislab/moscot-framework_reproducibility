@@ -20,7 +20,11 @@ def process_adata(cfg: DictConfig) -> tuple[AnnData, AnnData, AnnData]:
     adata_spatial = sc.read(path_data / cfg.paths.adata_sp)
 
     adata_sc.obsm["cite"] = adata_p.X.copy()
-    adata_sc.obsm["X_pca_cite"] = adata_p.obsm["X_pca"].copy()
+    # adata_sc.obsm["X_pca_cite"] = adata_p.obsm["X_pca"].copy()
+    adata_sc.obsm["X_pca_cite"] = np.concatenate(
+        [adata_sc.obsm["X_pca"], adata_p.obsm["X_pca"]],
+        axis=1,
+    )
 
     adata_spatial.X = adata_spatial.layers["normalized"].copy()
     sc.pp.pca(adata_spatial, n_comps=50)
@@ -91,8 +95,8 @@ def benchmark(cfg):
         initializer=cfg.moscot.initializer,
         tau_a=cfg.moscot.tau_a,
         tau_b=1,
-        min_iterations=10_000,
-        max_iterations=100_000,
+        min_iterations=5_000,
+        max_iterations=150_000,
         threshold=1e-20,
     )
     end_time = datetime.now()

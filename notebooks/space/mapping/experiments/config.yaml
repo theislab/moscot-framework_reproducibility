@@ -23,12 +23,13 @@ moscot:
 
 hydra:
     job:
-        name: mapping_protein
+        name: mapping_proteinpwd
+        
     sweeper:
         params:
             moscot.alpha: 0.3 #, 0.1
-            moscot.rank: 300
-            moscot.sc_attr: X_pca #, X_pca_cite
-            moscot.gamma: 10 #, 10, 100
-            moscot.initializer: random, k-means, rank2
+            moscot.rank: 400
+            moscot.sc_attr: X_pca, X_pca_cite
+            moscot.gamma: 10
+            moscot.initializer: k-means, rank2 # random
             moscot.tau_a: 1 #, 0.5, 0.2, 0.1
