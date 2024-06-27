@@ -205,11 +205,3 @@ Another way to speed up compuations is by combining cells into metacells. We sho
 [[1] Qiu et al.,  "Systematic reconstruction of cellular trajectories across mouse embryogenesis." Nat Genet (2022)](https://www.nature.com/articles/s41588-022-01018-x) <br> 
 [[2] Schiebinger et al.,  "Optimal-Transport Analysis of Single-Cell Gene Expression Identifies Developmental Trajectories in Reprogramming." Cell (2019)](https://www.nature.com/articles/s41588-022-01018-x) <br> 
 [[3]  Ben-Kiki et al.,  "Metacell-2: a divide-and-conquer metacell algorithm for scalable scRNA-seq analysis." Gen Biol (2022)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-022-02667-1) 
-<<<<<<< HEAD
-
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> origin/mouse_atlas_post_revisions
-
->>>>>>> Stashed changes
