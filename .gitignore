@@ -147,3 +147,9 @@ dmypy.json
 
 # R stuff
 *.Rhistory
+
+*.err
+*.out
+multirun
+
+.vscode

@@ -1,0 +1,35 @@
+# @package _global_
+
+defaults:
+    - _self_
+    - launcher: default
+
+paths:
+    path_data: /lustre/groups/ml01/workspace/moscot_paper/mapping
+    adata_sc: adata_sc_processed.h5ad
+    adata_p: adata_cite_processed.h5ad
+    adata_sp: vizgen_liver/adata_result.h5ad
+    path_results: /lustre/groups/ml01/workspace/moscot_paper/mapping/results
+
+moscot:
+    cost: sq_euclidean
+    sc_attr: X_pca
+    alpha: 0.1
+    rank: 10
+    epsilon: 0
+    gamma: 1
+    initializer: k-means
+    tau_a: 1
+
+hydra:
+    job:
+        name: mapping_proteinpwd
+        
+    sweeper:
+        params:
+            moscot.alpha: 0.3 #, 0.1
+            moscot.rank: 400
+            moscot.sc_attr: X_pca, X_pca_cite
+            moscot.gamma: 10
+            moscot.initializer: k-means, rank2 # random
+            moscot.tau_a: 1 #, 0.5, 0.2, 0.1

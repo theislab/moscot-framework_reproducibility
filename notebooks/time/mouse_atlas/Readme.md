@@ -3,23 +3,22 @@ We applied moscot to a 1.7M cells mouse developental atlas [[1]](https://www.nat
 
 ## Notebook folders
 
+### 0_Data_preparation
+Contains Seurat integration and conversion of the downloaded .RDS files (http://tome.gs.washington.edu/) into anndata objects. We share the created anndatas on figshare (https://figshare.com/articles/dataset/Mouse_embryogenesis_atlas_-_pariwise_anndatas/25040537)
 
 <details>
-    <summary>0_Data_preparation  </summary>
+    <summary>0_Integration_notebooks </summary>
     &nbsp; 
     
-Contains Seurat integration and conversion of the downloaded .RDS files (http://tome.gs.washington.edu/) into anndata objects.
-
-#### 0_Integration_notebooks:
-  
-  Runs TOME on the integrated data as done by Qiu et al. It contains the following notebooks:
-  
    * ```MG_05-01-2023_Seurat_Integartion.ipynb```: Performs Seurat's anchor based batch correction analogous to Qiu et al, using using code obtained from https://github.com/ChengxiangQiu/tome_code.
    * ```MG_05-01-2023_Seurat_Integartion_E8.5b-E9.5_Redone.ipynb```: Performs the same integration, but using 3000 hvgs instead of 2000 hvgs since integration with 2000 hvgs was not able to separate neural crest and allantois sufficiently.
+</details>
 
-#### 1_Seurat_object_to_anndata_notebooks:
+<details>
+    <summary>1_Seurat_object_to_anndata_notebooks </summary>
+    &nbsp;  
 
-  Transforms the downloaded .RDS objects into anndata objects, which are then concatenated and the intefration result is added.
+  Transforms the downloaded .RDS objects into anndata objects, which are then concatenated and the integration emebdding is added.
   
    * ```MG_05-01-2023_Seurat_object_to_anndata.ipynb```: Runs SeuratDisk/Data to transform .RDS into anndata objects.
    * ```MG_05-01-2023_Ensemble_to_gene_symbol.ipynb```: Uses Biomart to construct a dictionary translating ENSEMBL IDs to gene symbols.
@@ -32,113 +31,177 @@ Contains Seurat integration and conversion of the downloaded .RDS files (http://
 
 
 
+### 1_Main_figure
+Contains the notebooks to create all figures displayed in Figure 2 of the manuscript.
+
 <details>
-    <summary>1_Memory_and_runtime_benchmark  </summary>
+    <summary>0_Memory_and_runtime_benchmark </summary>
     &nbsp; 
+
+Benchmarks the memory usage (on CPU) and runtime for moscot and WOT. For moscot low-rank we chose a rank 2,000 here.
     
-This folder contains scripts benchmarking memory consumption and running time of WOT, moscot and moscot low rank.
-
-
-#### 0_Subsampling:
-  
-  Subsamples cells from the biggest time pair into anndata objects.
-  
-   * ```MG_05-01-2023_E11.5_subsampling```: Subsamples such that earlier and later time point both contain the same amount of cells, which increases in steps of 25,000, starting form 0, up to 275,000 cells.
-
-#### 1_Scripts:
-  Contains python scripts and yaml_files with which the benchmark was carried out. For each yaml file the exists the corresponding python scirpt (e.g. bm_CPU_offline.yml and run_cpu_offline.py).
-
+   * 0_Slurm_jobs: contains the scripts to run moscot and WOT both on CPU and GPU (only for moscot). We scheduled the runs using using sbatch and I log the evaluation results to weights-and-biases.
+   * 1_Results: Contains the benchmark results and notebooks to load and plot them.
 </details>
 
-
 <details>
-    <summary>2_Cell_type_transition_analysis  </summary>
+    <summary>1_Cell_type_transition_analysis  </summary>
+    Runs TOME and moscot and evaluates the predictions on a cell-type level
     &nbsp; 
-    
-Both moscot and TOME were run on the same latent representation to obtain cell type transition rates, which are then evaluated.
 
-#### 0_TOME:
-  
-  Performs integration as done by Qiu et al. It contains the following notebooks:
-  
-   * ```MG_05-01-2023_TOME_Maps_for_cell_type_transitions```: Runs TOME as in  https://github.com/ChengxiangQiu/tome_code.
-
-#### 1_moscot:
-
-  Runs moscot on the same representation as used in TOME  
-   * ```Run_moscot.py```: Python script running moscot and saving the solution of the TemporalProblem.
-   * ```MG_05-01-2023_Check_apoptosis_rate.ipynb```: Loads the calculated solution to inspect growth/apoptisis rates.
-   * ```MG_05-01-2023_moscot_transport_matrix_to_cell_type_transitions.ipynb```: Uses the moscot solutions to compute cell type transition rates.
-   
-   
-#### 2_Validation:
-
-  Evaluating the transitions obtained from TOME and moscot  
-   * ```MG_05-01-2023_Evaluation_of_cell_type_transitions.ipynb```: Uses curated transitions and germ layer annotation (Supplementary Table 1) to calculate accuracy scores.
+   * ```0_Run_TOME.ipynb```: This notebook runs TOME on the Seurat-integrated embedding and saves the result.
+   * ```1_Run_moscot.ipynb```: This notebook runs moscot on the Seurat-integrated embedding and saves the result.
+   * ```2_Evaluate_and_plot.ipynb```: We use the germ-layer and curated transitions to evaluate the predicted transitions and create plots.
 </details>
 
-
-
-
 <details>
-    <summary>3_Growth_rate_and_driver_gene_analysis  </summary>
+    <summary>2_Growth_rate_and_driver_gene_analysis  </summary>
     &nbsp; 
     
-To get a more detailed view of transitions on the cell level we extend the kNN-approach intruduced by to to cell-level TOME (cl-TOME), which is then compared to moscot. For this analyis, extraembryonic tissues (inlcuding blood progenitors and primitive erythroid cells until E8.5) have been excluded for the stages gastulation and organogenesis.
-
+Again computes the transitions for both TOME and moscot, this time evalauting on a single cell level.
+   
 
 #### 0_cl-TOME:
   
-  Performs integration as done by Qiu et al. It contains the following notebooks:
+Performs integration as done by Qiu et al. It contains the following notebooks:
   
-   * ```MG_05-01-2023_TOME_Maps_for_growth_rate_and_driver_genes_analysis.ipynb```: Saves the identified neirest neighbors obtained while running TOME.
-   * ```MG_05-01-2023_Transforming_Identified_Neigbors_to_Transport_Matrix.ipynb```: Takes the neirest neighbor files and shapes them into a sparse matrix.
-   * ```MG_05-01-2023_TOME_transport_matrix_to_growth_rates.ipynb```: Uses the neirest neighbor matrix to calculate growth rates.
-   * ```MG_05-01-2023_TOME_transport_matrix_to_pulls.ipynb```: Uses the neirest neighbor matrix to calculate pulls of selected cell types.
+   * ```0_TOME_Maps_for_growth_rate_and_driver_genes_analysis.ipynb```: Saves the identified neirest neighbors obtained while running TOME.
+   * ```1_Transforming_Identified_Neigbors_to_Transport_Matrix.ipynb```: Takes the neirest neighbor files and shapes them into a sparse matrix.
+   * ```2_TOME_transport_matrix_to_growth_rates.ipynb```: Uses the neirest neighbor matrix to calculate growth rates.
+   * ```3_TOME_transport_matrix_to_pulls.ipynb```: Uses the neirest neighbor matrix to calculate pulls of selected cell types.
    
-
 #### 1_moscot:
 
-  Runs moscot on the same representation as used in TOME  
-   * ```Run_moscot.py```: Python script running moscot and saving the resulting solution.
-   * ```MG_05-01-2023_Check_apoptosis_rate.ipynb```: Loads the calculated solution to inspect growth/apoptisis rates.
-   * ```MG_05-01-2023_moscot_transport_matrix_to_growth_rates.ipynb```: Used the moscot solutions to compute growth rates.
-   * ```MG_05-01-2023_moscot_transport_matrix_to_pulls.ipynb```: Used the moscot solutions to compute pulls of selected cell types.
-   
-   
-#### 2_Validation:
+Runs moscot on all individual time points:
 
-  Evaluates obtained growth rates and cell type pulls
-  
-   * 0_scVI_computations: Contains 1 notebook running scVI to obtain scVI normalized gene expression.
-   * 1_Driver_gene_correlations: Contains 4 notebooks calculating correlation of scVI normalized gene expression to cell type pulls.
-   * 2_Apoptosis_rates: Contains 1 notebook calculating apoptosis rates for both moscot and cl-TOME.
-   
+   * ```0_Run_moscot.ipynb```:  This saves the growth rates and also the pull of selected cell types for some time points.
+
+#### 2_Evaluation:
+
+Here we compute the scVI embedding to obtain an inferred count matrix. This scVI-matrix is then used to correlate the pull of selected cell populations to driver genes:
+
+   * ```0_Run_scVI_for_gene_expression_inference.ipynb```:  This runs scVI on the four time points we are correlating pulls to driver gene expression.
+   * ```1_Definitive_endoderm.ipynb```:  Loads the pull of E7.25 definitive endoderm for clTOME and msocot and correlates it to driver genes
+   * ```2_Allantois.ipynb```:  Loads the pull of E8.0 allantois for clTOME and msocot and correlates it to driver genes
+   * ```3_First_heart_field.ipynb```:  Loads the pull of E8.25 first heart field for clTOME and msocot and correlates it to driver genes
+   * ```4_Pancreatic_epithelium.ipynb```:  Loads the pull of E11.5 pancreatic epithelium for clTOME and msocot and correlates it to driver genes
+
+#### 3_Plots:
+
+We create the UMAPs, growth rates and pull-correlation plots here:
+
+   * ```0_E8_UMAPs.ipynb```:  Computes the UMAP for E8.0 to E8.25 and plots the growth rates and the driver gene correlations for the first heart field
+   * ```1_Plotting_marker_gene_correlation.ipynb```:  This only creates the boxplot for driver gene to pull correlations
+
 </details>
 
 
+
+### 2_Supplementary_figures
+
+This contains all the notebooks and scripts to create the supplementary figures that are connected to the mouse atlas data as well as the IPS reprogramming data
 
 
 <details>
-    <summary>4_Figures  </summary>
+    <summary>0_Growth_rates </summary>
+    &nbsp; 
+
+Plots the growth rates for the mouse atlas data for all time pairs.
+    
+   * ```0_Create_obs.ipynb```: In order to not always have to relaod the full anndata-objects I only save the .obs-entry for convenience
+   * ```1_Illustrate_growth_rates.ipynb```: Loads the growth rates for clTOME and moscot and plots them as histograms
+</details>
+
+<details>
+    <summary>1_moscot_WOT_comparison </summary>
+    &nbsp; 
+
+For the reviews we made sure that the mapping obtained by moscot and WOT are comparable. This is done here:
+
+   * ```0_Run_WOT.ipynb```: We run WOT on the mouse atlas up to E8.5 using the same initial growth rates, entropic regularization, and unbalancedness parameters as moscot.
+   * ```1_Run_moscot.ipynb```: We rerun moscot using the cost normalized by the median (since WOT normalizes the cost matrix by the median, and msocot by the mean by default)
+   * ```2_Single_cell_transitions_into_cell_type_transitions.ipynb```: Before we only saved the transition matrices. For evaluation we also need the cell type transitions, which is calculated here.
+   * ```3_Evaluate_and_plot.ipynb```: Combine everything and make nice plots.
+</details>
+
+
+<details>
+    <summary>2_PCA_and_scVI  </summary>
     &nbsp; 
     
-#### 0_Main_figure:
-Notebooks to create plots and figures
+In order to evaluate how resilient moscot and TOME are to batch effect we ran both models also on other embeddings than the Seurat integration.
 
-   * ```MG_05-01-2023_Memory_and_runtime_benchmark.ipynb```: Plots result of memory and runtime benchmark.
-   * ```MG_05-01-2023_Cell_type_transition_accuracy.ipynb```: Plots result of cell type transition analysis.
-   * ```MG_05-01-2023_E8_UMAPs.ipynb```: Plots UMAPS of growth rates, pulls and gene expression of E8.0 to E8.25 data.
-   * ```MG_05-01-2023_Plotting_marker_gene_correlation.ipynb```: Plots result of driver gene correlations.
+#### 0_PCA:
+  
+Computes the PCA embedding (no integration) for all time points and runs TOME and moscot on it:
+  
+   * ```0_Comupte_PCA_for_TOME.ipynb```: Uses a standard scanpy procedure to cumpute a 30-dimensional PCA embedding.
+   * ```1_Run_TOME_on_PCA.ipynb```: Runs TOME on this PCA embedding.
+   * ```2_Run_moscot_on_PCA_embedding.ipynb```: Uses the same PCA embedding as used by TOME to run moscot on.
    
-#### 1_Supplementary figure:
-   * ```MG_05-01-2023_Illustrate_growth_rates.ipynb```: Plots computed growth rates for all time pairs.
+#### 1_scVI:
+  
+For a non-linear embedding we opted for scVI. We compute a scVI embedding for each of the 3 embrionic stages we defined:
+  
+   * ```0_Compute_stagewise_scVI.ipynb```: For each of the three stages (pre-gastrulation, gastrulation, and organogenesis) we concatenate all anndatas and compute a scVI embedding.
+   * ```1_Run_TOME_on_scVI.ipynb```: Runs TOME using this scVI embedding.
+   * ```2_Run_moscot_on_scVI_embedding.ipynb```: Runs moscot using this scVI embedding.
+
+#### 2_Evaluate_and_plot:
+  
+Evaluates the mappings for the anchor- (=Seurat embedding), PCA- and scVI-embedding.
+  
+   * ```0_Evaluate_and_plot.ipynb```: Loads and evaluates the mappings for the three embeddings for TOME and moscot using germ-layer and curated transitions
+   * ```1_Plot_scVI_3d_UMAP.ipynb```: For the E8.5 time point/pair we illustrate the evaluation results using a 3d UMAP (since TOME uses this 3d UMAP to calculate distances)
 
 </details>
+
+<details>
+    <summary>3_Low_Rank </summary>
+    &nbsp; 
+
+We evaluated the runtime and performance of moscot for various choices of ranks for low-rank factorization.
+    
+   * ```0_Low_Rank_moscot.ipynb```: Calculates moscot mappings for all time points and different ranks and saves the evaluation results to weights-and-biases.
+   * ```1_LR_wandb_plots.ipynb```: Loads the wandb-results and plots them.
+</details>
+
+
+<details>
+    <summary>4_Growth_rates_for_IPS_reprogramming </summary>
+    &nbsp; 
+
+We had to switch to an IPS reprogramming dataset to show that growth rates that are predicted by moscot correlate with growth rates predicted using gene signatures since we did not have a working set of prolfieration/apoptosis genes spanning different cell types and developmental stages in mouse.
+
+    
+   * ```0_Compute_PCAs_and_UMAPs.ipynb```: Calculates PCA embedding for all analyzed time pairs (> day 8)
+   * ```1_TOME_compute_growth_rates.ipynb```: Runs clTOME on the PCa embedding
+   * ```2_TOME_Transforming_Identified_Neigbors_to_Transport_Matrix_to_growh_rates.ipynb```: Translate the custom TOME output to kNN growth rates
+   * ```3_Run_moscot.ipynb```: Runs moscot on the IPS reprogramming PCA embeddings
+   * ```4_Evaluate_and_plot.ipynb```: Combines all results and plots them
+</details>
+
+
+<details>
+    <summary>5_Metacells </summary>
+    &nbsp; 
+
+Another way to speed up compuations is by combining cells into metacells. We show the shortcoming of this approach on the E9.5-E10.5-E11.5 - mouse atlas data:
+
+
+   * ```0_Select_single_timepoint_anndatas.ipynb```: Saves the anndata objects for E9.5,E10.5, and E11.5
+   * ```1_Metacells.ipynb```: I run Metacell-2[[2]] on all three time points.
+   * ```2_Run_moscot_on_Metacells.ipynb```: I run moscot using the metacell aggregations.
+   * ```3_Metacell_transition_matrix_to_single_cell_transition_matrix.ipynb```: I transform the metacell-transport matrix back to a single-cell transport matrix such that it can be compared to the conventional moscot results.
+   * ```4_Cell_type_transition_accuracies.ipynb```: This accumulates the single-cell transport matrix into cell type transport matrix in order to compute germ-layer and curated transition accuracies.
+   * ```5_Pancreatic_epithelium.ipynb```: We also want to evaluate how well the pull of pancreatic cells correlates to driver genes for the single-cell and the metacell cases.
+   * ```6_Pancreatic_epithelium.ipynb```: This plots the result for the moscot maps on metacells but also illustrates on the E9.5 time point that rare cell types can easily be missed by the metacell aggregation.
+</details>
+
 
 
 
 
 [[1] Qiu et al.,  "Systematic reconstruction of cellular trajectories across mouse embryogenesis." Nat Genet (2022)](https://www.nature.com/articles/s41588-022-01018-x) <br> 
-[[2] Schiebinger et al.,  "Optimal-Transport Analysis of Single-Cell Gene Expression Identifies Developmental Trajectories in Reprogramming." Cell (2019)](https://www.nature.com/articles/s41588-022-01018-x) 
-
+[[2] Schiebinger et al.,  "Optimal-Transport Analysis of Single-Cell Gene Expression Identifies Developmental Trajectories in Reprogramming." Cell (2019)](https://www.nature.com/articles/s41588-022-01018-x) <br> 
+[[3]  Ben-Kiki et al.,  "Metacell-2: a divide-and-conquer metacell algorithm for scalable scRNA-seq analysis." Gen Biol (2022)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-022-02667-1) 
