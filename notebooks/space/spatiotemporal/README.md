@@ -24,9 +24,8 @@ We use the data as provided in [[1]](https://doi.org/10.1016/j.cell.2022.04.003)
     &nbsp; 
 
 #### 0_grid_search:
-* ```ZP_2023-04-20_spatiotemporal_fullembryo-accuracy.ipynb```: Imports the grid search run and visualizes the mapping accuracy.
 
-  ##### 0_moscot
+##### 0_moscot
   We compute the mapping between the time points using moscot _SpatioTemporalProblem_ and _TemporalProblem_. 
   For _SpatioTemporalProblem_ we run a grid search over the `alpha` values using SLURM.
 
@@ -65,6 +64,9 @@ The mapping accuracy will be saved under `data/space/spatiotemporal/output_tome`
 will instantiate sbatch calls to calculate couplings between all timepoints
 The mapping accuracy will be saved under `data/space/spatiotemporal/output_paste`.
    * ```run_paste2.py```: Main function called by `run_mosta_st_map.sh`.
+
+##### 3_joint_analysis
+```ZP_2023-04-20_spatiotemporal_fullembryo-accuracy.ipynb```: Imports the grid search run and visualizes the mapping accuracy.
 
 Files:
 - requires `MOSTA_curated_transitions.csv` (Supplementary table 5 in Klein et al. (2023))
