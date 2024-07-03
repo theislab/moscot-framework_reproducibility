@@ -2,81 +2,37 @@
 import moscot as mt
 import pandas as pd
 import numpy as np
-import gc
 import matplotlib.pyplot as plt
 import scanpy as sc
-import numpy as np
-from ott.geometry import pointcloud
-from ott.problems.linear import linear_problem
-from ott.solvers.linear import sinkhorn
-from ott.tools import sinkhorn_divergence
-import jax.numpy as jnp
-
 # %%
+df = pd.read_csv("./mean_count_diag.csv", index_col=0)
+df["mean_count_diag"] = df["mean_count_diag"]/df["mean_count_diag"].max()
+df = pd.read_csv("./mean_count_diag_2.csv", index_col=0)
+df["mean_count_diag"] = df["mean_count_diag"]/df["mean_count_diag"].max()
+# df = pd.concat([df, df2])
+df["timepoints"] = df["timepoints"].replace(
+    {
+        # "10.5-11.5_11.5-12.5_12.5-10.5":"A[10.5-11.5] B[11.5-12.5] C[12.5-10.5]",
+        "9.5-10.5_10.5-11.5_11.5-9.5":"A[9.5-10.5] B[10.5-11.5] C[11.5-9.5]"
+        }
+    )
+# %%
+import seaborn as sns
+import mplscience
+mplscience.set_style()
+g = sns.scatterplot(data=df, x="epsilon", y="mean_count_diag", hue="timepoints", s=100)
+g.set(xlabel="epsilon", ylabel="Fraction of entries equal or larger \n than diagonal in transport matrix", title="A[E9.5-E10.5] B[E10.5-E11.5] C[E11.5-E9.5 \n")
+g.legend(loc='center left', bbox_to_anchor=(1, 0.5)).remove()
+# %%
+import squidpy as sq
 adata = mt.datasets.mosta()
 adata.obs["time"] = pd.Categorical(adata.obs["time"])
+adata.obs["x"] = adata.obsm["spatial"][:,0]
+adata.obs["y"] = adata.obsm["spatial"][:,1]
+adata.obs['color_index'] = np.arange(len(adata))
 # %%
-stp = mt.problems.SpatioTemporalProblem(adata)
-# %%
-stp = stp.score_genes_for_marginals(
-    gene_set_proliferation="mouse", gene_set_apoptosis="mouse"
-)
-# %%
-stp = stp.prepare(
-    time_key="time",
-    spatial_key="spatial",
-    joint_attr=None,
-    callback="local-pca",
-    policy="explicit",
-    subset=[(9.5, 10.5), (10.5, 11.5), (11.5, 9.5)],
-)
-# %%
-stp.solve(epsilon=0, rank=300, gamma=100)
-# %%
-t0 = stp[(9.5, 10.5)].solution.transport_matrix
-t1 = stp[(10.5, 11.5)].solution.transport_matrix
-t2 = stp[(11.5, 9.5)].solution.transport_matrix
-tmat = t0 @ t1 @ t2
-# del t0, t1, t2
-# gc.collect()
-# plt.imshow(total)
-# %%
-tmat = np.fliplr(tmat)
-sc.pp.pca(adata)
-feat = adata[adata.obs.time == 9.5].obsm["X_pca"]
-idx = np.random.choice(len(feat), size=(50,))
-feat = feat[idx].copy()
-N = len(feat)
-B = np.repeat(feat, N, axis=0)
-A = np.tile(feat, (N, 1))
-# pc = np.concatenate((A, B), axis=1)
-# %%
-
-# A_sub, B_sub = A[idx].copy(), B[idx].copy()
-total_sub = tmat[idx, ...][..., idx].flatten().copy()
-eye_sub = (np.eye(len(idx)) / len(idx)).flatten()
-
+# sq.pl.spatial_scatter(adata[adata.obs.time==9.5], shape=None, size=10, color="x")
+# sq.pl.spatial_scatter(adata[adata.obs.time==9.5], shape=None, size=10, color="y")
+sq.pl.spatial_scatter(adata[adata.obs.time==9.5], shape=None, size=10, color="color_index", title="Color index")
 
 # %%
-def sink_divergence(x, y, a, b, epsilon=0.01) -> jnp.ndarray:
-    """Sink divergence."""
-    ot = sinkhorn_divergence.sinkhorn_divergence(
-        pointcloud.PointCloud,
-        x=x,
-        y=y,
-        epsilon=epsilon,
-        static_b=True,
-        a=a,
-        b=b,
-    )
-    return ot.divergence
-
-
-print(sink_divergence(A, B, total_sub, eye_sub, epsilon=0.01))
-# %%
-
-# %%
-idx = np.random.choice(len(feat), size=(50,))
-shuffled_total = tmat[idx, ...][..., idx].flatten().copy()
-# shuffled_total = np.repeat(1 / (len(total_sub) ** 2), len(total_sub))
-print(sink_divergence(A, B, shuffled_total, eye_sub, epsilon=0.01))
